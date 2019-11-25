@@ -1,0 +1,14 @@
+/production/
+
+## IntelliJ
+/.idea/
+*.iml
+
+## Gradle
+/.gradle/
+build/
+out/
+
+## OS Specific
+.DS_Store
+Thumbs.db
