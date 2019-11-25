@@ -1,0 +1,204 @@
+/*
+ * Copyright 2019 Nicolas Maltais
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.maltaisn.svgequations.parser
+
+import org.junit.Test
+import kotlin.test.assertEquals
+
+
+internal class PathTokenizerTest {
+
+    private val tokenizer = PathTokenizer(false)
+    private val tokenizerLenient = PathTokenizer(true)
+
+    @Test
+    fun `single command with coordinate space separated`() {
+        val tokens = tokenizer.tokenize("M 10 10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `single command with coordinate comma separated`() {
+        val tokens = tokenizer.tokenize("M,10,10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `bunch of unused separators`() {
+        val tokens = tokenizer.tokenize("  ,, , M,, , ,, ,10,  ,, ,10, ,, , ")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `single command with fractional coordinate`() {
+        val tokens = tokenizer.tokenize("M 10.0 0.10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, 0.1), tokens.values)
+    }
+
+    @Test
+    fun `single command with fractional coordinate no separator`() {
+        val tokens = tokenizer.tokenize("M10..10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, 0.1), tokens.values)
+    }
+
+    @Test
+    fun `single command with signed coordinate`() {
+        val tokens = tokenizer.tokenize("M +10 -10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, -10.0), tokens.values)
+    }
+
+    @Test
+    fun `single command with signed coordinate no separator`() {
+        val tokens = tokenizer.tokenize("M+10-10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, -10.0), tokens.values)
+    }
+
+    @Test
+    fun `single command with signed fractional coordinate no separator`() {
+        val tokens = tokenizer.tokenize("M+1.-.1")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(1.0, -0.1), tokens.values)
+    }
+
+    @Test
+    fun `multiple command with coordinates`() {
+        val tokens = tokenizer.tokenize("M 0,0 L 10,10 h 10 v-10 Z")
+        assertEquals(listOf('M', 'L', 'h', 'v', 'Z'), tokens.commands)
+        assertEquals(listOf(0.0, 0.0, 10.0, 10.0, 10.0, -10.0), tokens.values)
+    }
+
+    @Test
+    fun `multiple command with coordinates dirty`() {
+        val tokens = tokenizer.tokenize("M-.1.1l2.,+.2H10v10z")
+        assertEquals(listOf('M', 'l', 'H', 'v', 'z'), tokens.commands)
+        assertEquals(listOf(-0.1, 0.1, 2.0, 0.2, 10.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `implicit polyline with absolute M`() {
+        val tokens = tokenizer.tokenize("M10,10,20,20,30,30,40,40")
+        assertEquals(listOf('M', 'L', 'L', 'L'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0, 20.0, 20.0, 30.0, 30.0, 40.0, 40.0), tokens.values)
+    }
+
+    @Test
+    fun `implicit polyline with relative M`() {
+        val tokens = tokenizer.tokenize("m10,10,20,20,30,30,40,40")
+        assertEquals(listOf('m', 'l', 'l', 'l'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0, 20.0, 20.0, 30.0, 30.0, 40.0, 40.0), tokens.values)
+    }
+
+    @Test
+    fun `polyline with extra L coordinate pairs`() {
+        val tokens = tokenizer.tokenize("M0,0 L10,10, 10,20, 20,20, 20,10")
+        assertEquals(listOf('M', 'L', 'L', 'L', 'L'), tokens.commands)
+        assertEquals(listOf(0.0, 0.0, 10.0, 10.0, 10.0, 20.0, 20.0, 20.0, 20.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `polyline with extra H,V values`() {
+        val tokens = tokenizer.tokenize("M0,0 h20 10 5 v20 10 5")
+        assertEquals(listOf('M', 'h', 'h', 'h', 'v', 'v', 'v'), tokens.commands)
+        assertEquals(listOf(0.0, 0.0, 20.0, 10.0, 5.0, 20.0, 10.0, 5.0), tokens.values)
+    }
+
+    @Test
+    fun `polybezier with extra Q coordinate pairs`() {
+        val tokens = tokenizer.tokenize("M0,0 Q10,10 20,0 30,-10 40,0 50,10 60,0")
+        assertEquals(listOf('M', 'Q', 'Q', 'Q'), tokens.commands)
+        assertEquals(listOf(0.0, 0.0, 10.0, 10.0, 20.0, 0.0, 30.0, -10.0, 40.0, 0.0, 50.0, 10.0, 60.0, 0.0), tokens.values)
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `fail trailing values start`() {
+        tokenizer.tokenize("10,10M10,10Z")
+    }
+
+    @Test
+    fun `fail trailing values start lenient`() {
+        val tokens = tokenizerLenient.tokenize("10,10M10,10Z")
+        assertEquals(listOf('M', 'Z'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `fail trailing values end`() {
+        tokenizer.tokenize("M10,10Z10")
+    }
+
+    @Test
+    fun `fail trailing values end lenient`() {
+        val tokens = tokenizerLenient.tokenize("M10,10Z10")
+        assertEquals(listOf('M', 'Z'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `missing values fail`() {
+        tokenizer.tokenize("M10Z")
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `missing values lenient`() {
+        // Can't invent missing values so this is a fatal error.
+        tokenizerLenient.tokenize("M10Z")
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `extra values fail`() {
+        tokenizer.tokenize("M10,10,10Z")
+    }
+
+    @Test
+    fun `extra values lenient`() {
+        val tokens = tokenizerLenient.tokenize("M10,10,10Z")
+        assertEquals(listOf('M', 'Z'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0), tokens.values)
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `unknown character fail`() {
+        tokenizer.tokenize("M10,10@@@L10,10")
+    }
+
+    @Test
+    fun `unknown character lenient`() {
+        val tokens = tokenizerLenient.tokenize("M10,10@@@L20,20")
+        assertEquals(listOf('M', 'L'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0, 20.0, 20.0), tokens.values)
+    }
+
+    @Test(expected = SvgParseException::class)
+    fun `invalid number literal fail`() {
+        tokenizer.tokenize("M-.10..0.1")
+    }
+
+    @Test
+    fun `invalid number literal lenient`() {
+        val tokens = tokenizerLenient.tokenize("M-.10..0.1")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(-0.1, 0.1), tokens.values)
+    }
+
+}

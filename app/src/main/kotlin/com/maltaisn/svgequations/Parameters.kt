@@ -25,19 +25,26 @@ class Parameters {
     @Parameter
     private val files = mutableListOf<String>()
 
-    @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations")
+    @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations", order = 0)
     private val precision = 2
 
-    @Parameter(names = ["-s", "--scale"], description = "Scale factor of SVG paths")
+    @Parameter(names = ["-s", "--scale"], description = "Scale factor of SVG paths", order = 1)
     private val scale = 1.0
 
-    @Parameter(names = ["-h", "--help"], description = "Show help message", help = true)
+    @Parameter(names = ["-l", "--lenient"], description = "Enable lenient mode to ignore non-fatal errors.", order = 3)
+    var lenient = false
+
+    @Parameter(names = ["-h", "--help"], description = "Show help message", help = true, order = 4)
     var help = false
 
 
     fun validate() {
         if (precision !in 0..8) {
             paramError("Precision must be between 0 and 8.")
+        }
+
+        if (scale <= 0.0) {
+            paramError("Scale must be greater than 0.")
         }
 
         for (fileName in files) {
