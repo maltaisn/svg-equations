@@ -31,6 +31,9 @@ class Parameters {
     @Parameter(names = ["-s", "--scale"], description = "Scale factor of SVG paths", order = 1)
     private val scale = 1.0
 
+    @Parameter(names = ["-a", "--angle-units"], description = "Angle units, either 'radians' or 'degrees'", order = 2)
+    var angleUnits = ANGLE_DEGREES
+
     @Parameter(names = ["-l", "--lenient"], description = "Enable lenient mode to ignore non-fatal errors.", order = 3)
     var lenient = false
 
@@ -47,6 +50,10 @@ class Parameters {
             paramError("Scale must be greater than 0.")
         }
 
+        if (angleUnits != ANGLE_DEGREES && angleUnits != ANGLE_RADIANS) {
+            paramError("Invalid angle units.")
+        }
+
         for (fileName in files) {
             if (!File(fileName).exists()) {
                 paramError("Input file '$fileName' doesn't exist.")
@@ -54,5 +61,9 @@ class Parameters {
         }
     }
 
+    companion object {
+        val ANGLE_DEGREES = "degrees"
+        val ANGLE_RADIANS = "radians"
+    }
 
 }

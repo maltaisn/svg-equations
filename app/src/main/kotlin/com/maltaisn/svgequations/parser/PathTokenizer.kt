@@ -16,8 +16,6 @@
 
 package com.maltaisn.svgequations.parser
 
-import java.util.*
-
 
 /**
  * Used to split a SVG path string into commands and numeric values.
@@ -29,7 +27,7 @@ class PathTokenizer(val lenient: Boolean) {
 
     private lateinit var pathStr: String
 
-    private var tokens = Tokens()
+    private var tokens = PathTokens()
     private var valueStart = -1
     private var valueHasPoint = false
     private var valueHasSign = false
@@ -40,10 +38,10 @@ class PathTokenizer(val lenient: Boolean) {
      * Tokenize a SVG [path string][pathStr].
      * @throws SvgParseException Thrown on parse errors.
      */
-    fun tokenize(pathStr: String): Tokens {
+    fun tokenize(pathStr: String): PathTokens {
         this.pathStr = pathStr
 
-        tokens = Tokens()
+        tokens = PathTokens()
         valueStart = -1
         valueHasPoint = false
         valueHasSign = false
@@ -160,11 +158,6 @@ class PathTokenizer(val lenient: Boolean) {
     }
 
     private fun getCommandArity(command: Char?) = COMMAND_ARITY[command?.toUpperCase()] ?: 0
-
-    class Tokens {
-        val commands = LinkedList<Char>()
-        val values = LinkedList<Double>()
-    }
 
     companion object {
         /** The number of values each command expects to find. */
