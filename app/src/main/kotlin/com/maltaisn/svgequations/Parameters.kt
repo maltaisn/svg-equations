@@ -17,19 +17,18 @@
 package com.maltaisn.svgequations
 
 import com.beust.jcommander.Parameter
-import java.io.File
 
 
 class Parameters {
 
     @Parameter
-    private val files = mutableListOf<String>()
+    val files = mutableListOf<String>()
 
     @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations", order = 0)
-    private val precision = 2
+    var precision = 2
 
     @Parameter(names = ["-s", "--scale"], description = "Scale factor of SVG paths", order = 1)
-    private val scale = 1.0
+    var scale = 1.0
 
     @Parameter(names = ["-a", "--angle-units"], description = "Angle units, either 'radians' or 'degrees'", order = 2)
     var angleUnits = ANGLE_DEGREES
@@ -52,12 +51,6 @@ class Parameters {
 
         if (angleUnits != ANGLE_DEGREES && angleUnits != ANGLE_RADIANS) {
             paramError("Invalid angle units.")
-        }
-
-        for (fileName in files) {
-            if (!File(fileName).exists()) {
-                paramError("Input file '$fileName' doesn't exist.")
-            }
         }
     }
 

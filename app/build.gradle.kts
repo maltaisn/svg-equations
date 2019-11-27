@@ -16,7 +16,7 @@ dependencies {
 sourceSets {
     java {
         named("test") {
-            resources.srcDir("test/res")
+            resources.srcDir("src/test/res")
         }
     }
 }

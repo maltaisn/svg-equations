@@ -17,6 +17,10 @@
 package com.maltaisn.svgequations
 
 import com.beust.jcommander.JCommander
+import com.maltaisn.svgequations.parser.PathParser
+import com.maltaisn.svgequations.parser.PathTokenizer
+import com.maltaisn.svgequations.parser.SvgParser
+import java.io.File
 import kotlin.system.exitProcess
 
 
@@ -43,7 +47,14 @@ fun main(args: Array<String>) {
         params.validate()
 
         // Generate equations
-
+        val svgParser = SvgParser(params.lenient)
+        val pathTokenizer = PathTokenizer(params.lenient)
+        val pathParser = PathParser(params.lenient)
+        for (file in params.files) {
+            val pathsData = svgParser.parse(File(file))
+            val paths = pathsData.map { pathParser.parse(pathTokenizer.tokenize(it)) }
+            // TODO generate equations
+        }
 
         exitProcess(0)
 
