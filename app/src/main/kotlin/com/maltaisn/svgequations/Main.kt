@@ -17,10 +17,14 @@
 package com.maltaisn.svgequations
 
 import com.beust.jcommander.JCommander
+import com.maltaisn.svgequations.generator.EquationFormatter
+import com.maltaisn.svgequations.generator.EquationGenerator
+import com.maltaisn.svgequations.generator.ParametricGenerator
 import com.maltaisn.svgequations.parser.PathParser
 import com.maltaisn.svgequations.parser.PathTokenizer
 import com.maltaisn.svgequations.parser.SvgParser
 import java.io.File
+import java.text.DecimalFormat
 import kotlin.system.exitProcess
 
 
@@ -46,14 +50,33 @@ fun main(args: Array<String>) {
         // Validate arguments
         params.validate()
 
-        // Generate equations
+        // Create parsers
         val svgParser = SvgParser(params.lenient)
         val pathTokenizer = PathTokenizer(params.lenient)
         val pathParser = PathParser(params.lenient)
-        for (file in params.files) {
-            val pathsData = svgParser.parse(File(file))
+
+        // Create equation generator
+        val formatter = EquationFormatter(DecimalFormat().apply {
+            maximumFractionDigits = params.precision
+        })
+        val generator: EquationGenerator = when (params.type) {
+            Parameters.TYPE_PARAMETRIC -> ParametricGenerator(formatter, params.convertToLatex)
+            Parameters.TYPE_CARTESIAN -> TODO()
+            else -> error("Unknown type")
+        }
+
+        // Generate equations
+        for (filename in params.files) {
+            val file = File(filename)
+
+            // Parse SVG paths
+            val pathsData = svgParser.parse(file)
             val paths = pathsData.map { pathParser.parse(pathTokenizer.tokenize(it)) }
-            // TODO generate equations
+
+            // Generate and output equations
+            val equations = paths.flatMap { generator.generateEquation(it) }
+            val output = file.resolveSibling("${file.nameWithoutExtension}-output.txt")
+            output.writeText(equations.joinToString("\n"))
         }
 
         exitProcess(0)

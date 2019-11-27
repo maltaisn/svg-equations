@@ -28,6 +28,8 @@ data class Vec2(val x: Double = 0.0, val y: Double = 0.0) {
 
     operator fun times(s: Double) = Vec2(s * x, s * y)
 
+    operator fun times(s: Int) = Vec2(s * x, s * y)
+
     operator fun div(s: Double) = Vec2(x / s, y / s)
 
     operator fun unaryMinus() = Vec2(-x, -y)
