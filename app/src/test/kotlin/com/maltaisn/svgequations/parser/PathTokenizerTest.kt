@@ -75,10 +75,24 @@ internal class PathTokenizerTest {
     }
 
     @Test
+    fun `single command with signed coordinate 2 no separator`() {
+        val tokens = tokenizer.tokenize("M10-10")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(10.0, -10.0), tokens.values)
+    }
+
+    @Test
     fun `single command with signed fractional coordinate no separator`() {
         val tokens = tokenizer.tokenize("M+1.-.1")
         assertEquals(listOf('M'), tokens.commands)
         assertEquals(listOf(1.0, -0.1), tokens.values)
+    }
+
+    @Test
+    fun `single command with fractional coordinate without leading zero no separator`() {
+        val tokens = tokenizer.tokenize("M.1.2")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(0.1, 0.2), tokens.values)
     }
 
     @Test
@@ -197,8 +211,8 @@ internal class PathTokenizerTest {
     @Test
     fun `invalid number literal lenient`() {
         val tokens = tokenizerLenient.tokenize("M-.10..0.1")
-        assertEquals(listOf('M'), tokens.commands)
-        assertEquals(listOf(-0.1, 0.1), tokens.values)
+        assertEquals(listOf('M', 'L'), tokens.commands)
+        assertEquals(listOf(-0.1, 0.0, 0.1), tokens.values)
     }
 
 }

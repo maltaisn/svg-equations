@@ -60,17 +60,13 @@ class PathTokenizer(val lenient: Boolean) {
                         // Start pos of a new value.
                         pushValue(i)
                         valueStart = i
-                    } else {
-                        // Decimal point of current value.
-                        valueHasPoint = true
                     }
+                    valueHasPoint = true
                 }
                 char == '+' || char == '-' -> {
                     // Start pos of a value.
-                    if (valueStart == -1 || valueHasSign) {
-                        pushValue(i)
-                        valueStart = i
-                    }
+                    pushValue(i)
+                    valueStart = i
                     valueHasSign = true
                 }
                 char in '0'..'9' -> {
@@ -143,7 +139,8 @@ class PathTokenizer(val lenient: Boolean) {
         }
 
         val value = valueStr.toDoubleOrNull()
-        if (value == null) {
+        if (value == null || valueStr == ".") {
+            // "." would be parsed as 0 but that's wrong.
             if (!lenient) {
                 // If lenient, skip the invalid value.
                 parseError("Invalid number literal '$valueStr' in path", valueStart)
