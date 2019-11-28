@@ -17,42 +17,46 @@
 package com.maltaisn.svgequations
 
 import com.beust.jcommander.Parameter
+import com.beust.jcommander.Parameters
 
 
+@Parameters(separators = " =")
 class Parameters {
 
     @Parameter
     var files = mutableListOf<String>()
 
-    @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations", order = 0)
+    @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations.", order = 0)
     var precision = 2
 
-    @Parameter(names = ["-s", "--scale"], description = "Scale factor of SVG paths", order = 1)
-    var scale = 1.0
+    @Parameter(names = ["--scale"], arity = 2, description = "SVG scale factor in each direction (scaleX, scaleY).", order = 10)
+    var scale: List<Double> = listOf(1.0, -1.0)
 
-    @Parameter(names = ["-a", "--angle-units"], description = "Angle units, either 'radians' or 'degrees'", order = 2)
+    @Parameter(names = ["--rotate"], description = "SVG rotation in degrees, counter-clockwise.", order = 20)
+    var rotation: Double = 0.0
+
+    @Parameter(names = ["--translate"], arity = 2, description = "SVG offset distance in pixels (offsetX, offsetY).", order = 30)
+    var translate: List<Double> = listOf(0.0, 0.0)
+
+    @Parameter(names = ["-a", "--angle-units"], description = "Angle units, either 'radians' or 'degrees'.", order = 40)
     var angleUnits = ANGLE_DEGREES
 
-    @Parameter(names = ["-t", "--type"], description = "Type of equations to generate, either 'parametric' or 'cartesian'.", order = 3)
+    @Parameter(names = ["-t", "--type"], description = "Type of equations to generate, either 'parametric' or 'cartesian'.", order = 50)
     var type = TYPE_PARAMETRIC
 
-    @Parameter(names = ["-x", "--latex"], description = "Whether to format output as latex equations.", order = 4)
+    @Parameter(names = ["-x", "--latex"], description = "Whether to format output as latex equations.", order = 60)
     var convertToLatex = false
 
-    @Parameter(names = ["-l", "--lenient"], description = "Enable lenient mode to ignore non-fatal errors.", order = 5)
+    @Parameter(names = ["-l", "--lenient"], description = "Enable lenient mode to ignore non-fatal errors.", order = 70)
     var lenient = false
 
-    @Parameter(names = ["-h", "--help"], description = "Show help message", help = true, order = 6)
+    @Parameter(names = ["-h", "--help"], description = "Show help message.", help = true, order = 80)
     var help = false
 
 
     fun validate() {
         if (precision !in 0..8) {
             paramError("Precision must be between 0 and 8.")
-        }
-
-        if (scale <= 0.0) {
-            paramError("Scale must be greater than 0.")
         }
 
         if (angleUnits != ANGLE_DEGREES && angleUnits != ANGLE_RADIANS) {

@@ -17,6 +17,7 @@
 package com.maltaisn.svgequations.parser
 
 import com.maltaisn.svgequations.element.*
+import com.maltaisn.svgequations.math.Vec2
 import java.util.*
 
 

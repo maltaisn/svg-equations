@@ -16,11 +16,16 @@
 
 package com.maltaisn.svgequations.element
 
+import com.maltaisn.svgequations.math.Mat33
+
 
 /**
  * A SVG path made of many [elements].
  */
-class Path(val elements: List<Element>) {
+class Path(val elements: List<Element>) : Transformable<Path> {
+
+    override fun transform(transform: Mat33): Path =
+            Path(elements.map { it.transform(transform) })
 
     override fun toString() = "Path($elements elements)"
 

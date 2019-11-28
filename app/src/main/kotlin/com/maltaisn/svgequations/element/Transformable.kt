@@ -16,24 +16,17 @@
 
 package com.maltaisn.svgequations.element
 
+import com.maltaisn.svgequations.math.Mat33
 
-/**
- * A 2D point or dimension.
- */
-data class Vec2(val x: Double = 0.0, val y: Double = 0.0) {
 
-    operator fun plus(p: Vec2) = Vec2(x + p.x, y + p.y)
+interface Transformable<T> {
 
-    operator fun minus(p: Vec2) = Vec2(x - p.x, y - p.y)
-
-    operator fun times(s: Double) = Vec2(s * x, s * y)
-
-    operator fun times(s: Int) = Vec2(s * x, s * y)
-
-    operator fun div(s: Double) = Vec2(x / s, y / s)
-
-    operator fun unaryMinus() = Vec2(-x, -y)
-
-    override fun toString() = "($x, $y)"
+    /**
+     * Transform this element using a transform matrix.
+     * Returns a transformed of the element.
+     * @param transform Transformation matrix.
+     * @param scale Scale matrix only, to scale dimensions.
+     */
+    fun transform(transform: Mat33): T
 
 }

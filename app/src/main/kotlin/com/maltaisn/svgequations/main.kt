@@ -20,11 +20,13 @@ import com.beust.jcommander.JCommander
 import com.maltaisn.svgequations.generator.EquationFormatter
 import com.maltaisn.svgequations.generator.EquationGenerator
 import com.maltaisn.svgequations.generator.ParametricGenerator
+import com.maltaisn.svgequations.math.Mat33
 import com.maltaisn.svgequations.parser.PathParser
 import com.maltaisn.svgequations.parser.PathTokenizer
 import com.maltaisn.svgequations.parser.SvgParser
 import java.io.File
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import kotlin.system.exitProcess
 
 
@@ -57,7 +59,11 @@ fun main(args: Array<String>) {
 
         // Create equation generator
         val formatter = EquationFormatter(DecimalFormat().apply {
+            decimalFormatSymbols = DecimalFormatSymbols().apply {
+                decimalSeparator = '.'
+            }
             maximumFractionDigits = params.precision
+            groupingSize = 0
         })
         val generator: EquationGenerator = when (params.type) {
             Parameters.TYPE_PARAMETRIC -> ParametricGenerator(formatter, params.convertToLatex)
@@ -65,13 +71,18 @@ fun main(args: Array<String>) {
             else -> error("Unknown type")
         }
 
+        // Create transformation matrix
+        val transform = Mat33.translate(params.translate[0], params.translate[1]) *
+                Mat33.rotation(Math.toRadians(params.rotation)) *
+                Mat33.scale(params.scale[0], params.scale[1])
+
         // Generate equations
         for (filename in params.files) {
             val file = File(filename)
 
-            // Parse SVG paths
+            // Parse SVG paths and transform them
             val pathsData = svgParser.parse(file)
-            val paths = pathsData.map { pathParser.parse(pathTokenizer.tokenize(it)) }
+            val paths = pathsData.map { pathParser.parse(pathTokenizer.tokenize(it)).transform(transform) }
 
             // Generate and output equations
             val equations = paths.flatMap { generator.generateEquation(it) }
@@ -81,9 +92,8 @@ fun main(args: Array<String>) {
 
         exitProcess(0)
 
-    } catch (e: ParameterException) {
+    } catch (e: Exception) {
         println("ERROR: ${e.message}\n")
-        commander.usage()
         exitProcess(1)
     }
 

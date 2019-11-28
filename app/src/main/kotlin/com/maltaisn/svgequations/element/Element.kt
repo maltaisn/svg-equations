@@ -16,11 +16,13 @@
 
 package com.maltaisn.svgequations.element
 
+import com.maltaisn.svgequations.math.Vec2
+
 
 /**
  * An SVG element with a [start] point and an [end] point.
  */
-interface Element {
+interface Element : Transformable<Element> {
     val start: Vec2
     val end: Vec2
 }

@@ -16,7 +16,11 @@
 
 package com.maltaisn.svgequations.generator
 
-import com.maltaisn.svgequations.element.*
+import com.maltaisn.svgequations.element.Arc
+import com.maltaisn.svgequations.element.Curve
+import com.maltaisn.svgequations.element.Line
+import com.maltaisn.svgequations.element.Path
+import com.maltaisn.svgequations.math.Vec2
 import org.junit.Test
 import kotlin.test.assertEquals
 

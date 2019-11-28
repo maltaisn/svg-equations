@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package com.maltaisn.svgequations.element
-
-import com.maltaisn.svgequations.math.Mat33
-import com.maltaisn.svgequations.math.Vec2
+package com.maltaisn.svgequations.math
 
 
 /**
- * A bezier curve with a [start] point, an [end] point and a list of [controls] points.
+ * A 2D point or dimension.
  */
-data class Curve(override val start: Vec2, override val end: Vec2,
-                 val controls: List<Vec2>) : Element {
+data class Vec2(val x: Double = 0.0, val y: Double = 0.0) {
 
-    override fun transform(transform: Mat33) =
-            Curve(transform * start, transform * end, controls.map { transform * it })
+    operator fun plus(p: Vec2) = Vec2(x + p.x, y + p.y)
+
+    operator fun minus(p: Vec2) = Vec2(x - p.x, y - p.y)
+
+    operator fun times(s: Double) = Vec2(s * x, s * y)
+
+    operator fun times(s: Int) = Vec2(s * x, s * y)
+
+    operator fun div(s: Double) = Vec2(x / s, y / s)
+
+    operator fun unaryMinus() = Vec2(-x, -y)
+
+    override fun toString() = "($x, $y)"
 
 }

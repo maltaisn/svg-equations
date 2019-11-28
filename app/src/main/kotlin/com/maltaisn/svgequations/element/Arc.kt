@@ -16,6 +16,9 @@
 
 package com.maltaisn.svgequations.element
 
+import com.maltaisn.svgequations.math.Mat33
+import com.maltaisn.svgequations.math.Vec2
+
 
 /**
  * An elliptic arc with a [start] point, an [end] point, a [radius] and a [rotation] (in radians).
@@ -26,4 +29,8 @@ package com.maltaisn.svgequations.element
  */
 data class Arc(override val start: Vec2, override val end: Vec2,
                val radius: Vec2, val rotation: Double,
-               val largeArc: Boolean, val sweep: Boolean) : Element
+               val largeArc: Boolean, val sweep: Boolean) : Element {
+
+    override fun transform(transform: Mat33): Element = TODO()
+
+}

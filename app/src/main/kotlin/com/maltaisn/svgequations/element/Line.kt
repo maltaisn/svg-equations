@@ -16,8 +16,16 @@
 
 package com.maltaisn.svgequations.element
 
+import com.maltaisn.svgequations.math.Mat33
+import com.maltaisn.svgequations.math.Vec2
+
 
 /**
  * A line with a [start] point and an [end] point.
  */
-data class Line(override val start: Vec2, override val end: Vec2) : Element
+data class Line(override val start: Vec2, override val end: Vec2) : Element {
+
+    override fun transform(transform: Mat33) =
+            Line(transform * start, transform * end)
+
+}
