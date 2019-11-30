@@ -16,10 +16,7 @@
 
 package com.maltaisn.svgequations.generator
 
-import com.maltaisn.svgequations.element.Arc
-import com.maltaisn.svgequations.element.Curve
-import com.maltaisn.svgequations.element.Line
-import com.maltaisn.svgequations.element.Path
+import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
 
 
@@ -33,64 +30,40 @@ class ParametricGenerator(override var formatter: EquationFormatter,
 
     override fun generateEquation(path: Path): List<String> {
         val equations = mutableListOf<String>()
-        loop@ for (element in path.elements) {
-            var equation = when (element) {
-                is Line -> getLineEquation(element)
-                is Curve -> getCurveEquation(element)
-                is Arc -> getArcEquation(element)
-                else -> continue@loop
+        val t = parameter
+        for (curve in path.curves) {
+            // Get curve terms and coefficients from bezier definition
+            val terms = mutableListOf<Pair<Vec2, String>>()
+            val n = curve.size - 1
+            for ((i, p) in curve.withIndex()) {
+                // Using https://en.wikipedia.org/wiki/B%C3%A9zier_curve#General_definition
+                val coeff = factorial(n) / (factorial(i) * factorial(n - i))
+                val t1 = raiseTermToPower("t", i)
+                val t2 = raiseTermToPower("(1-t)", n - i)
+                terms += (p * coeff) to (t1 + t2)
             }
+
+            // Create equation for X and Y separatedly
+            val xEq = formatter.format(terms.map { (p, t) -> p.x to t })
+            val yEq = formatter.format(terms.map { (p, t) -> p.y to t })
+            var equation = "($xEq, $yEq)"
+
+            // Convert to latex if needed
             if (convertToLatex) {
                 equation = convertToLatex(equation)
             }
+
             equations += equation
         }
         return equations
     }
 
-    private fun getLineEquation(line: Line): String {
-        // Line: P0 * (1 - t) + P1 * t
-        val t = parameter
-        return getParametricEquation(
-                line.start to "(1-$t)",
-                line.end to "$t")
+    private fun raiseTermToPower(term: String, p: Int) = when (p) {
+        0 -> ""
+        1 -> term
+        else -> "$term^$p"
     }
 
-    private fun getCurveEquation(curve: Curve): String {
-        val t = parameter
-        return when (curve.controls.size) {
-            0 -> getLineEquation(Line(curve.start, curve.end))
-            1 -> {
-                // Quadratic: P0 * (1-t)^2 + P1 * 2t(1-t) + P2 * t^2
-                getParametricEquation(
-                        curve.start to "(1-$t)^2",
-                        (curve.controls[0] * 2) to "$t(1-$t)",
-                        curve.end to "$t^2")
-            }
-            2 -> {
-                // Cubic: P0 * (1-t)^3 + P1 * 3t(1-t)^2 + P2 * 3t^2(1-t) + P3 * t^3
-                getParametricEquation(
-                        curve.start to "(1-$t)^3",
-                        (curve.controls[0] * 3) to "$t(1-$t)^2",
-                        (curve.controls[1] * 3) to "$t^2(1-$t)",
-                        curve.end to "$t^3")
-            }
-            else -> throw UnsupportedOperationException("Unsupported bezier order.")
-        }
-    }
-
-    private fun getArcEquation(arc: Arc): String {
-        // Ellipse:
-        // x = cx + rx * cos(t) * cos(r) - ry * sin(t) * sin(r)
-        // y = cy + rx * cos(t) * sin(r) - ry * sin(t) * cos(r)
-
-        TODO()
-    }
-
-    private fun getParametricEquation(vararg terms: Pair<Vec2, String>): String {
-        val xEq = formatter.format(terms.map { (p, t) -> p.x to t })
-        val yEq = formatter.format(terms.map { (p, t) -> p.y to t })
-        return "($xEq, $yEq)"
-    }
+    private fun factorial(n: Int): Int = if (n == 0) 1 else n * factorial(n - 1)
 
 }

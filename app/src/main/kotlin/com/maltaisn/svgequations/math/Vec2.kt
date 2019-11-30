@@ -22,9 +22,9 @@ package com.maltaisn.svgequations.math
  */
 data class Vec2(val x: Double = 0.0, val y: Double = 0.0) {
 
-    operator fun plus(p: Vec2) = Vec2(x + p.x, y + p.y)
+    operator fun plus(v: Vec2) = Vec2(x + v.x, y + v.y)
 
-    operator fun minus(p: Vec2) = Vec2(x - p.x, y - p.y)
+    operator fun minus(v: Vec2) = Vec2(x - v.x, y - v.y)
 
     operator fun times(s: Double) = Vec2(s * x, s * y)
 
@@ -33,6 +33,12 @@ data class Vec2(val x: Double = 0.0, val y: Double = 0.0) {
     operator fun div(s: Double) = Vec2(x / s, y / s)
 
     operator fun unaryMinus() = Vec2(-x, -y)
+
+    /** Dot product of this vector and another. */
+    infix fun dot(v: Vec2) = x * v.x + y * v.y
+
+    /** Magnitude of the cross product of this vector and another. */
+    infix fun cross(v: Vec2) = x * v.y - y * v.x
 
     override fun toString() = "($x, $y)"
 

@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-package com.maltaisn.svgequations.element
+package com.maltaisn.svgequations
 
 import com.maltaisn.svgequations.math.Mat33
 import com.maltaisn.svgequations.math.Vec2
 
 
 /**
- * A bezier curve with a [start] point, an [end] point and a list of [controls] points.
+ * A SVG path made of many [curves].
  */
-data class Curve(override val start: Vec2, override val end: Vec2,
-                 val controls: List<Vec2>) : Element {
+class Path(val curves: List<Curve>) {
 
-    override fun transform(transform: Mat33) =
-            Curve(transform * start, transform * end, controls.map { transform * it })
+    fun transform(transform: Mat33) = Path(curves.map { curve ->
+        curve.map { p -> transform * p }
+    })
+
+    override fun toString() = "Path($curves curves)"
 
 }
+
+typealias Curve = List<Vec2>

@@ -16,7 +16,7 @@
 
 package com.maltaisn.svgequations.parser
 
-import com.maltaisn.svgequations.element.Path
+import com.maltaisn.svgequations.Path
 import org.xml.sax.SAXException
 import java.io.File
 import java.io.IOException

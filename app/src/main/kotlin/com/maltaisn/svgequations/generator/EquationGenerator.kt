@@ -16,7 +16,7 @@
 
 package com.maltaisn.svgequations.generator
 
-import com.maltaisn.svgequations.element.Path
+import com.maltaisn.svgequations.Path
 
 
 interface EquationGenerator {

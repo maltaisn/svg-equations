@@ -16,13 +16,14 @@
 
 package com.maltaisn.svgequations.parser
 
-import com.maltaisn.svgequations.element.*
+import com.maltaisn.svgequations.Curve
+import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
 import java.util.*
 
 
 /**
- * Used to parse SVG tokens into SVG element classes.
+ * Used to parse SVG tokens into curve objects.
  * More info on SVG commands at [https://www.w3.org/TR/SVG/paths.html#PathDataBNF].
  *
  * @param lenient If lenient, parser will ignore non-fatal errors.
@@ -31,7 +32,7 @@ class PathParser(val lenient: Boolean) {
 
     private lateinit var tokens: PathTokens
 
-    private val elements = LinkedList<Element>()
+    private val curves = LinkedList<Curve>()
 
     /**
      * Parse SVG path [tokens].
@@ -39,7 +40,7 @@ class PathParser(val lenient: Boolean) {
      */
     fun parse(tokens: PathTokens): Path {
         this.tokens = tokens
-        elements.clear()
+        curves.clear()
 
         var lastPoint = Vec2()
         var startPoint = Vec2()
@@ -57,56 +58,56 @@ class PathParser(val lenient: Boolean) {
                 }
                 'Z' -> {
                     // Close path with straight line
-                    createElement(Line(lastPoint, startPoint))
+                    addCurve(lastPoint, startPoint)
                 }
-                'L' -> createElement(absolute, lastPoint) { readPoint ->
+                'L' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Line
                     point = readPoint()
-                    Line(lastPoint, point)
+                    addCurve(lastPoint, point)
                 }
-                'H' -> createElement(absolute, lastPoint.x) { readValue ->
+                'H' -> withPathContext(absolute, lastPoint.x) { readValue ->
                     // Horizontal line
                     point = Vec2(readValue(), lastPoint.y)
-                    Line(lastPoint, point)
+                    addCurve(lastPoint, point)
                 }
-                'V' -> createElement(absolute, lastPoint.y) { readValue ->
+                'V' -> withPathContext(absolute, lastPoint.y) { readValue ->
                     // Vertical line
                     point = Vec2(lastPoint.x, readValue())
-                    Line(lastPoint, point)
+                    addCurve(lastPoint, point)
                 }
-                'Q' -> createElement(absolute, lastPoint) { readPoint ->
+                'Q' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Quadratic bezier curve
                     val c1 = readPoint()
                     point = readPoint()
-                    Curve(lastPoint, point, listOf(c1))
+                    addCurve(lastPoint, c1, point)
                 }
-                'T' -> createElement(absolute, lastPoint) { readPoint ->
+                'T' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Shorthand quadratic bezier curve
-                    val c1 = getShorthandControl(elements.last, 1, lastPoint)
+                    val c1 = getShorthandControl(curves.last, 3, lastPoint)
                     point = readPoint()
-                    Curve(lastPoint, point, listOf(c1))
+                    addCurve(lastPoint, c1, point)
                 }
-                'C' -> createElement(absolute, lastPoint) { readPoint ->
+                'C' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Cubic bezier curve
                     val c1 = readPoint()
                     val c2 = readPoint()
                     point = readPoint()
-                    Curve(lastPoint, point, listOf(c1, c2))
+                    addCurve(lastPoint, c1, c2, point)
                 }
-                'S' -> createElement(absolute, lastPoint) { readPoint ->
+                'S' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Shorthand cubic bezier curve
-                    val c1 = getShorthandControl(elements.last, 2, lastPoint)
+                    val c1 = getShorthandControl(curves.last, 4, lastPoint)
                     val c2 = readPoint()
                     point = readPoint()
-                    Curve(lastPoint, point, listOf(c1, c2))
+                    addCurve(lastPoint, c1, c2, point)
                 }
-                'A' -> createElement(absolute, lastPoint) { readPoint ->
+                'A' -> withPathContext(absolute, lastPoint) { readPoint ->
                     val radius = this@PathParser.readPoint()
                     val rotation = Math.toRadians(readValue())
                     val largeArc = readBoolean()
                     val sweep = readBoolean()
                     point = readPoint()
-                    Arc(lastPoint, point, radius, rotation, largeArc, sweep)
+                    curves += arcToCurves(lastPoint, point, radius, rotation, largeArc, sweep)
                 }
                 else -> error("Unknown command")  // Should never happen.
             }
@@ -114,31 +115,31 @@ class PathParser(val lenient: Boolean) {
             lastPoint = point
         }
 
-        return Path(LinkedList(elements))
+        return Path(LinkedList(curves))
     }
 
-    private fun createElement(element: Element) {
-        if (element.start != element.end) {
+    private fun addCurve(vararg points: Vec2) {
+        if (points.first() != points.last()) {
             // Don't add element if start point matches end point which means element is invisible.
-            elements += element
+            curves += points.toList()
         }
     }
 
-    private inline fun createElement(absolute: Boolean, lastPoint: Vec2,
-                                     block: (readPoint: () -> Vec2) -> Element) =
-            createElement(if (absolute) {
+    private inline fun withPathContext(absolute: Boolean, lastPoint: Vec2,
+                                       block: (readPoint: () -> Vec2) -> Unit) =
+            if (absolute) {
                 block { readPoint() }
             } else {
                 block { readRelativePoint(lastPoint) }
-            })
+            }
 
-    private inline fun createElement(absolute: Boolean, lastValue: Double,
-                                     block: (readValue: () -> Double) -> Element) =
-            createElement(if (absolute) {
+    private inline fun withPathContext(absolute: Boolean, lastValue: Double,
+                                       block: (readValue: () -> Double) -> Unit) =
+            if (absolute) {
                 block { readValue() }
             } else {
                 block { readValue() + lastValue }
-            })
+            }
 
     private fun readValue() = tokens.values.pop()
 
@@ -158,11 +159,11 @@ class PathParser(val lenient: Boolean) {
     private fun readRelativePoint(lastPoint: Vec2) =
             Vec2(lastPoint.x + readValue(), lastPoint.y + readValue())
 
-    private fun getShorthandControl(lastElement: Element, controls: Int, currentPoint: Vec2) =
-            if (lastElement is Curve && lastElement.controls.size == controls) {
+    private fun getShorthandControl(last: Curve, size: Int, currentPoint: Vec2) =
+            if (last.size == size) {
                 // The control point is the reflection of the second control point on
                 // the previous cubic command relative to the current point.
-                currentPoint + (currentPoint - lastElement.controls.last())
+                currentPoint + (currentPoint - last[last.size - 2])
             } else {
                 // Assume control point is coincident with the current point.
                 currentPoint

@@ -16,10 +16,7 @@
 
 package com.maltaisn.svgequations.generator
 
-import com.maltaisn.svgequations.element.Arc
-import com.maltaisn.svgequations.element.Curve
-import com.maltaisn.svgequations.element.Line
-import com.maltaisn.svgequations.element.Path
+import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -32,45 +29,29 @@ internal class ParametricGeneratorTest {
 
     @Test
     fun `generate line path equation`() {
-        val path = Path(listOf(Line(Vec2(1.0, 2.0), Vec2(10.0, 5.0))))
-        val equation = generator.generateEquation(path)
-        assertEquals(listOf("((1-t) + 10t, 2(1-t) + 5t)"), equation)
-    }
-
-    @Test
-    fun `generate line curve path equation`() {
-        val path = Path(listOf(Curve(Vec2(1.0, 2.0), Vec2(10.0, 5.0), emptyList())))
+        val path = Path(listOf(listOf(Vec2(1.0, 2.0), Vec2(10.0, 5.0))))
         val equation = generator.generateEquation(path)
         assertEquals(listOf("((1-t) + 10t, 2(1-t) + 5t)"), equation)
     }
 
     @Test
     fun `generate quadratic curve path equation`() {
-        val path = Path(listOf(Curve(Vec2(1.0, 2.0), Vec2(10.0, 5.0), listOf(Vec2(3.0, 4.0)))))
+        val path = Path(listOf(listOf(Vec2(1.0, 2.0), Vec2(3.0, 4.0), Vec2(10.0, 5.0))))
         val equation = generator.generateEquation(path)
         assertEquals(listOf("((1-t)^2 + 6t(1-t) + 10t^2, 2(1-t)^2 + 8t(1-t) + 5t^2)"), equation)
     }
 
     @Test
     fun `generate cubic curve path equation`() {
-        val path = Path(listOf(Curve(Vec2(1.0, 2.0), Vec2(10.0, 5.0),
-                listOf(Vec2(3.0, 4.0), Vec2(5.0, 6.0)))))
+        val path = Path(listOf(listOf(Vec2(1.0, 2.0), Vec2(3.0, 4.0), Vec2(5.0, 6.0), Vec2(10.0, 5.0))))
         val equation = generator.generateEquation(path)
         assertEquals(listOf("((1-t)^3 + 9t(1-t)^2 + 15t^2(1-t) + 10t^3, " +
                 "2(1-t)^3 + 12t(1-t)^2 + 18t^2(1-t) + 5t^3)"), equation)
     }
 
     @Test
-    fun `generate arc path equation`() {
-        val path = Path(listOf(Arc(Vec2(1.0, 2.0), Vec2(10.0, 2.0), Vec2(18.0, 9.0),
-                Math.PI / 2, largeArc = true, sweep = true)))
-        val equation = generator.generateEquation(path)
-        assertEquals(listOf("(,)"), equation)
-    }
-
-    @Test
     fun `generate path equation convert to latex`() {
-        val path = Path(listOf(Line(Vec2(1.0, 2.0), Vec2(10.0, 5.0))))
+        val path = Path(listOf(listOf(Vec2(1.0, 2.0), Vec2(10.0, 5.0))))
         val equation = latexGenerator.generateEquation(path)
         assertEquals(listOf("\\left(\\left(1-t\\right) + 10t, 2\\left(1-t\\right) + 5t\\right)"), equation)
     }
