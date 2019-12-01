@@ -147,8 +147,8 @@ class PathParser(val lenient: Boolean) {
         0.0 -> false
         1.0 -> true
         else -> if (lenient) {
-            // If lenient use 'false' for wrong boolean values.
-            false
+            // If lenient use 'true' for wrong boolean values.
+            true
         } else {
             parseError("Invalid boolean value '$value'.")
         }

@@ -61,6 +61,20 @@ internal class PathTokenizerTest {
     }
 
     @Test
+    fun `single command with exponent coordinate`() {
+        val tokens = tokenizer.tokenize("M 9.9E-1 1e+2")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(0.99, 100.0), tokens.values)
+    }
+
+    @Test
+    fun `single command with exponent coordinate no separator`() {
+        val tokens = tokenizer.tokenize("M9.e-1-.2E1")
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(0.9, -2.0), tokens.values)
+    }
+
+    @Test
     fun `single command with signed coordinate`() {
         val tokens = tokenizer.tokenize("M +10 -10")
         assertEquals(listOf('M'), tokens.commands)
@@ -138,10 +152,31 @@ internal class PathTokenizerTest {
     }
 
     @Test
+    fun `polyline with extra H,V values no separators`() {
+        val tokens = tokenizer.tokenize("M0,0h20 10 5v20 10 5")
+        assertEquals(listOf('M', 'h', 'h', 'h', 'v', 'v', 'v'), tokens.commands)
+        assertEquals(listOf(0.0, 0.0, 20.0, 10.0, 5.0, 20.0, 10.0, 5.0), tokens.values)
+    }
+
+    @Test
     fun `polybezier with extra Q coordinate pairs`() {
         val tokens = tokenizer.tokenize("M0,0 Q10,10 20,0 30,-10 40,0 50,10 60,0")
         assertEquals(listOf('M', 'Q', 'Q', 'Q'), tokens.commands)
         assertEquals(listOf(0.0, 0.0, 10.0, 10.0, 20.0, 0.0, 30.0, -10.0, 40.0, 0.0, 50.0, 10.0, 60.0, 0.0), tokens.values)
+    }
+
+    @Test
+    fun `arc without separator between flags`() {
+        val tokens = tokenizer.tokenize("A10,10 0 1020,10")
+        assertEquals(listOf('A'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0, 0.0, 1.0, 0.0, 20.0, 10.0), tokens.values)
+    }
+
+    @Test
+    fun `multiarc without separator between flags`() {
+        val tokens = tokenizer.tokenize("A10,10 0 1020,10 10,10 0 110,10")
+        assertEquals(listOf('A', 'A'), tokens.commands)
+        assertEquals(listOf(10.0, 10.0, 0.0, 1.0, 0.0, 20.0, 10.0, 10.0, 10.0, 0.0, 1.0, 1.0, 0.0, 10.0), tokens.values)
     }
 
     @Test(expected = SvgParseException::class)
@@ -211,8 +246,8 @@ internal class PathTokenizerTest {
     @Test
     fun `invalid number literal lenient`() {
         val tokens = tokenizerLenient.tokenize("M-.10..0.1")
-        assertEquals(listOf('M', 'L'), tokens.commands)
-        assertEquals(listOf(-0.1, 0.0, 0.1), tokens.values)
+        assertEquals(listOf('M'), tokens.commands)
+        assertEquals(listOf(-0.1, 0.0), tokens.values)
     }
 
 }

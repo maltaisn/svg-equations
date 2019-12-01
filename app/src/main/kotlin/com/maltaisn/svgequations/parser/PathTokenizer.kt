@@ -26,12 +26,9 @@ package com.maltaisn.svgequations.parser
 class PathTokenizer(val lenient: Boolean) {
 
     private lateinit var pathStr: String
+    private var valuesSinceCommand = 0
 
     private var tokens = PathTokens()
-    private var valueStart = -1
-    private var valueHasPoint = false
-    private var valueHasSign = false
-    private var valuesSinceCommand = 0
 
 
     /**
@@ -40,121 +37,156 @@ class PathTokenizer(val lenient: Boolean) {
      */
     fun tokenize(pathStr: String): PathTokens {
         this.pathStr = pathStr
-
-        tokens = PathTokens()
-        valueStart = -1
-        valueHasPoint = false
-        valueHasSign = false
         valuesSinceCommand = 0
 
-        // Parse commands and values
-        for (i in 0..pathStr.length) {
-            val char = pathStr.getOrNull(i)
-            when {
-                char == null || char.isWhitespace() || char == ',' -> {
-                    // Value has ended.
-                    pushValue(i)
-                }
-                char == '.' -> {
-                    if (valueHasPoint || valueStart == -1) {
-                        // Start pos of a new value.
-                        pushValue(i)
-                        valueStart = i
-                    }
-                    valueHasPoint = true
-                }
-                char == '+' || char == '-' -> {
-                    // Start pos of a value.
-                    pushValue(i)
-                    valueStart = i
-                    valueHasSign = true
-                }
-                char in '0'..'9' -> {
-                    // Start pos of a value.
-                    if (valueStart == -1) {
-                        pushValue(i)
-                        valueStart = i
-                    }
-                }
-                "MZLHVQTCSA".contains(char, ignoreCase = true) -> {
-                    // Command
-                    pushValue(i)
+        tokens = PathTokens()
 
-                    val requiredValues = getCommandArity(tokens.commands.lastOrNull())
-                    if (requiredValues != valuesSinceCommand) {
-                        if (lenient && valuesSinceCommand > requiredValues) {
-                            // Lenient and there's too many values. Ignore them
-                            while (valuesSinceCommand > requiredValues) {
-                                tokens.values.removeLast()
-                                valuesSinceCommand--
-                            }
-                        } else {
-                            parseError("Path has incorrect number of values for command", i)
-                        }
-                    }
-                    tokens.commands += char
+        // Parse commands and values
+        var i = 0
+        loop@ while (i < pathStr.length) {
+            val c = pathStr[i]
+            when {
+                c == ',' || c.isWhitespace() -> {
+                }
+                c.toUpperCase() in "MZLHVQTCSA" -> {
+                    checkLastCommandArity(i)
+
+                    // Add command
+                    tokens.commands += c
                     valuesSinceCommand = 0
                 }
                 else -> {
-                    if (!lenient) {
-                        // If lenient, ignore the unknown character.
-                        parseError("Unknown character '$char'", i)
-                    }
-                }
-            }
+                    // Parse value starting at current index.
+                    val end = parseValueAt(i)
+                    val valueStr = pathStr.substring(i, end)
+                    val value = valueStr.toDoubleOrNull()
 
-            val lastCommand = tokens.commands.lastOrNull()
-            val commandArity = getCommandArity(lastCommand)
-            if (valuesSinceCommand > commandArity) {
-                if (commandArity == 0) {
-                    // Values before first command or after 'Z'.
-                    if (lenient) {
-                        // If lenient, just remove trailing value.
-                        tokens.values.removeLast()
-                        valuesSinceCommand--
+                    if (valueStr == "." || value == null) {
+                        // Invalid or empty number literal
+                        if (!lenient) {
+                            if (valueStr.isEmpty()) {
+                                parseError("Invalid character '${pathStr[i + 1]}'", i)
+                            } else {
+                                parseError("Invalid number literal '$valueStr'", i)
+                            }
+                        } else if (valueStr.isEmpty()) {
+                            // Lenient and current char is invalid, so just skip it.
+                            i = end + 1
+                            continue@loop
+                        }
                     } else {
-                        parseError("Path has trailing values", i)
+                        // Add value
+                        tokens.values += value
+                        valuesSinceCommand++
+
+                        // If there are too many values
+                        val lastArity = lastCommandArity
+                        if (valuesSinceCommand >= 2 * lastArity) {
+                            if (lastArity == 0) {
+                                // Path has a trailing value.
+                                if (lenient) {
+                                    // Lenient, so just remove trailing value.
+                                    tokens.values.removeLast()
+                                    valuesSinceCommand--
+                                } else {
+                                    parseError("Trailing values", i)
+                                }
+                            } else {
+                                // Multiple values sets, repeat command.
+                                val last = tokens.commands.last
+                                tokens.commands += when (last) {
+                                    'M' -> 'L'
+                                    'm' -> 'l'
+                                    else -> last
+                                }
+                                valuesSinceCommand = lastArity
+                            }
+                        }
                     }
-                } else {
-                    // Multiple sets of coordinates, repeat command.
-                    tokens.commands += when (lastCommand) {
-                        'M' -> 'L'
-                        'm' -> 'l'
-                        else -> lastCommand!!
-                    }
-                    valuesSinceCommand = 1
+
+                    // Continue from the end of parsed value.
+                    i = end
+                    continue@loop
                 }
             }
+            i++
         }
+
+        checkLastCommandArity(pathStr.length)
 
         return tokens
     }
 
-    private fun pushValue(end: Int) {
-        if (valueStart == -1) return
-        var valueStr = pathStr.substring(valueStart, end)
-        if (lenient) {
-            // Remove unknown characters that were ignored
-            valueStr = valueStr.replace(NUMBER_CHARS_REGEX, "")
+    /**
+     * Parse value starting at [start] index. Returns the end index of the value (exclusive).
+     */
+    private fun parseValueAt(start: Int): Int {
+        if (lastCommand == 'A' && valuesSinceCommand % 7 in 3..4 && pathStr[start] in '0'..'1') {
+            // Special case for valid syntax: "A10,10 0 1110,10" equivalent to "A10,10 0 1 1 10,10".
+            return start + 1
         }
 
-        val value = valueStr.toDoubleOrNull()
-        if (value == null || valueStr == ".") {
-            // "." would be parsed as 0 but that's wrong.
-            if (!lenient) {
-                // If lenient, skip the invalid value.
-                parseError("Invalid number literal '$valueStr' in path", valueStart)
+        var i = start
+        var valueHasPoint = false
+        var exponentPos = -1
+        while (i < pathStr.length) {
+            when (pathStr[i]) {
+                '.' -> {
+                    if (valueHasPoint) {
+                        return i
+                    } else {
+                        valueHasPoint = true
+                    }
+                }
+                'e', 'E' -> {
+                    if (exponentPos != -1) {
+                        return i
+                    } else {
+                        exponentPos = i
+                    }
+                }
+                '+', '-' -> {
+                    if (i != start && i != exponentPos + 1) {
+                        return i
+                    }
+                }
+                !in '0'..'9' -> {
+                    return i
+                }
             }
-        } else {
-            tokens.values += value
-            valuesSinceCommand++
+            i++
         }
-        valueStart = -1
-        valueHasPoint = false
-        valueHasSign = false
+        return i
     }
 
-    private fun getCommandArity(command: Char?) = COMMAND_ARITY[command?.toUpperCase()] ?: 0
+    /**
+     * Check if last command has the correct number of values.
+     */
+    private fun checkLastCommandArity(i: Int) {
+        // Check if previous command has the right number of values.
+        val lastArity = lastCommandArity
+        if (valuesSinceCommand < lastArity) {
+            // Not enough values. Even lenient can't recover from this.
+            parseError("Not enough values on command", i)
+        } else if (valuesSinceCommand > lastArity) {
+            // Too many values.
+            if (lenient) {
+                // Lenient, so remove extra values.
+                while (valuesSinceCommand > lastArity) {
+                    tokens.values.removeLast()
+                    valuesSinceCommand--
+                }
+            } else {
+                parseError("Too many values on command", i)
+            }
+        }
+    }
+
+    private val lastCommand: Char?
+        get() = tokens.commands.lastOrNull()?.toUpperCase()
+
+    private val lastCommandArity: Int
+        get() = COMMAND_ARITY[lastCommand] ?: 0
 
     companion object {
         /** The number of values each command expects to find. */
@@ -169,7 +201,5 @@ class PathTokenizer(val lenient: Boolean) {
                 'C' to 6,
                 'S' to 4,
                 'A' to 7)
-
-        private val NUMBER_CHARS_REGEX = """[^+\-.0-9]""".toRegex()
     }
 }
