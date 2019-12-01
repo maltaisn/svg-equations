@@ -26,7 +26,7 @@ internal class EquationGeneratorTest {
     @Test
     fun `latex formatter`() {
         val generator = TestGenerator(EquationFormatter(), true)
-        assertEquals("2\\left(a - 1\\right) \\left{-10 <= a <= 10\\right}",
+        assertEquals("2\\left(a - 1\\right) \\left\\{-10 <= a <= 10\\right\\}",
                 generator.convertToLatex("2(a - 1) {-10 <= a <= 10}"))
     }
 

@@ -89,25 +89,25 @@ internal class EquationFormatterTest {
 
     @Test
     fun `bounds greater than`() {
-        val equation = formatter.format(listOf(2.0 to "a"), 'a', boundsStart = 0.0)
+        val equation = formatter.format(listOf(2.0 to "a"), boundsSymbol = 'a', boundsStart = 0.0)
         assertEquals("2a {a >= 0}", equation)
     }
 
     @Test
     fun `bounds less than`() {
-        val equation = formatter.format(listOf(2.0 to "a"), 'a', boundsEnd = 0.0)
+        val equation = formatter.format(listOf(2.0 to "a"), boundsSymbol = 'a', boundsEnd = 0.0)
         assertEquals("2a {a <= 0}", equation)
     }
 
     @Test
     fun `bounds interval`() {
-        val equation = formatter.format(listOf(2.0 to "a"), 'a', boundsStart = -10.0, boundsEnd = 10.0)
+        val equation = formatter.format(listOf(2.0 to "a"), boundsSymbol = 'a', boundsStart = -10.0, boundsEnd = 10.0)
         assertEquals("2a {-10 <= a <= 10}", equation)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun `bounds interval wrong`() {
-        formatter.format(listOf(2.0 to "a"), 'a', boundsStart = 10.0, boundsEnd = -10.0)
+        formatter.format(listOf(2.0 to "a"), boundsSymbol = 'a', boundsStart = 10.0, boundsEnd = -10.0)
     }
 
 }

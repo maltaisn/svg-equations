@@ -43,7 +43,7 @@ interface EquationGenerator {
     fun convertToLatex(equation: String) = equation
             .replace("(", "\\left(")
             .replace(")", "\\right)")
-            .replace("{", "\\left{")
-            .replace("}", "\\right}")
+            .replace("{", "\\left\\{")
+            .replace("}", "\\right\\}")
 
 }

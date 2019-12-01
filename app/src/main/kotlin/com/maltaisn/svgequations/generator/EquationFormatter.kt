@@ -29,6 +29,7 @@ class EquationFormatter(
      * If resulting equation is empty, `0` is returned.
      */
     fun format(equation: List<Pair<Double, String>>,
+               equalsTo: Double? = null,
                boundsSymbol: Char = 'x',
                boundsStart: Double = Double.NEGATIVE_INFINITY,
                boundsEnd: Double = Double.POSITIVE_INFINITY): String {
@@ -59,6 +60,12 @@ class EquationFormatter(
 
             // Append term
             sb.append(term)
+        }
+
+        // Append equals sign and value
+        if (equalsTo != null) {
+            sb.append(" = ")
+            sb.append(numberFmt.format(equalsTo))
         }
 
         // Append bounds

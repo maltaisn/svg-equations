@@ -17,6 +17,7 @@
 package com.maltaisn.svgequations
 
 import com.beust.jcommander.JCommander
+import com.maltaisn.svgequations.generator.CartesianGenerator
 import com.maltaisn.svgequations.generator.EquationFormatter
 import com.maltaisn.svgequations.generator.EquationGenerator
 import com.maltaisn.svgequations.generator.ParametricGenerator
@@ -67,14 +68,14 @@ fun main(args: Array<String>) {
         })
         val generator: EquationGenerator = when (params.type) {
             Parameters.TYPE_PARAMETRIC -> ParametricGenerator(formatter, params.convertToLatex)
-            Parameters.TYPE_CARTESIAN -> TODO()
+            Parameters.TYPE_CARTESIAN -> CartesianGenerator(formatter, params.convertToLatex)
             else -> error("Unknown type")
         }
 
         // Create transformation matrix
-        val transform = Mat33.translate(params.translate[0], params.translate[1]) *
-                Mat33.rotation(Math.toRadians(params.rotation)) *
-                Mat33.scale(params.scale[0], params.scale[1])
+        val transform = Mat33.scale(params.scale[0], params.scale[1]) *
+                Mat33.translate(params.translate[0], params.translate[1]) *
+                Mat33.rotation(Math.toRadians(params.rotation))
 
         // Generate equations
         for (filename in params.files) {

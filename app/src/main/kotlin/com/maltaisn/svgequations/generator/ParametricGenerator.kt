@@ -18,6 +18,7 @@ package com.maltaisn.svgequations.generator
 
 import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
+import com.maltaisn.svgequations.math.binomialCoeff
 
 
 /**
@@ -37,7 +38,7 @@ class ParametricGenerator(override var formatter: EquationFormatter,
             val n = curve.size - 1
             for ((i, p) in curve.withIndex()) {
                 // Using https://en.wikipedia.org/wiki/B%C3%A9zier_curve#General_definition
-                val coeff = factorial(n) / (factorial(i) * factorial(n - i))
+                val coeff = binomialCoeff(n, i)
                 val t1 = raiseTermToPower("t", i)
                 val t2 = raiseTermToPower("(1-t)", n - i)
                 terms += (p * coeff) to (t1 + t2)
@@ -63,7 +64,5 @@ class ParametricGenerator(override var formatter: EquationFormatter,
         1 -> term
         else -> "$term^$p"
     }
-
-    private fun factorial(n: Int): Int = if (n == 0) 1 else n * factorial(n - 1)
 
 }
