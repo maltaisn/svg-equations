@@ -24,6 +24,8 @@ import kotlin.math.min
 
 /**
  * Equation generator used to generate cartesian equations.
+ * Note: cartesian equations usually require a lot more precision than parametric equations
+ * to achieve the same result.
  */
 class CartesianGenerator(override var formatter: EquationFormatter,
                          override val convertToLatex: Boolean = false) : EquationGenerator {

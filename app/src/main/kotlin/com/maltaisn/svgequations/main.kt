@@ -73,7 +73,7 @@ fun main(args: Array<String>) {
         }
 
         // Create transformation matrix
-        val transform = Mat33.scale(params.scale[0], params.scale[1]) *
+        val transform = Mat33.scale(params.scale[0], -params.scale[1]) *
                 Mat33.translate(params.translate[0], params.translate[1]) *
                 Mat33.rotation(Math.toRadians(params.rotation))
 
