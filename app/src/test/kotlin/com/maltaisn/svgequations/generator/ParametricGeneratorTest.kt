@@ -49,11 +49,4 @@ internal class ParametricGeneratorTest {
                 "2(1-t)^3 + 12t(1-t)^2 + 18t^2(1-t) + 5t^3)"), equation)
     }
 
-    @Test
-    fun `generate path equation convert to latex`() {
-        val path = Path(listOf(listOf(Vec2(1.0, 2.0), Vec2(10.0, 5.0))))
-        val equation = latexGenerator.generateEquation(path)
-        assertEquals(listOf("\\left(\\left(1-t\\right) + 10t, 2\\left(1-t\\right) + 5t\\right)"), equation)
-    }
-
 }

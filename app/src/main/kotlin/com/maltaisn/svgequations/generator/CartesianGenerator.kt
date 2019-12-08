@@ -17,6 +17,7 @@
 package com.maltaisn.svgequations.generator
 
 import com.maltaisn.svgequations.Path
+import com.maltaisn.svgequations.paramError
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -49,13 +50,13 @@ class CartesianGenerator(override var formatter: EquationFormatter,
                                 'y', min(p[0].y, p[1].y), max(p[0].y, p[1].y))
                     }
                 }
-                3 -> {
-                    TODO()
+                else -> {
+                    // Bezier to cartesian is actually possible and can be approximated
+                    // quickly by fitting a polynomial of the same degree, but it wouldn't
+                    // be easy to determine the bounds of the polynomial. Specifying x/y
+                    // bounds isn't enough since there can be loops in the curve.
+                    paramError("Cartesian equation type doesn't support curves.")
                 }
-                4 -> {
-                    TODO()
-                }
-                else -> error("Invalid curve size.")
             }
 
             // Convert to latex if needed
