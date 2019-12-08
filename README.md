@@ -7,7 +7,10 @@ vector editor like Inkscape, or an optimizer like SVGO.
 
 This was primarily aimed to be used with [Desmos](https://www.desmos.com/calculator).
 Equations with latex formatting can be copy-pasted directly in the calculator.
+
 ![Desmos preview](example/image.png)
+
+![World map zoom](example/europe.png)
 
 Jar files can be found under [releases](https://github.com/maltaisn/svg-equations/releases).
 
