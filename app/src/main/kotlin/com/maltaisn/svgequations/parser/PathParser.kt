@@ -59,6 +59,7 @@ class PathParser(val lenient: Boolean) {
                 'Z' -> {
                     // Close path with straight line
                     addCurve(lastPoint, startPoint)
+                    point = startPoint
                 }
                 'L' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Line
