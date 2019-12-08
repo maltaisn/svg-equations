@@ -18,6 +18,7 @@ package com.maltaisn.svgequations.math
 
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.math.tan
 
 
 /**
@@ -90,6 +91,13 @@ data class Mat33(val m00: Double, val m01: Double, val m02: Double,
                 cos(angle), -sin(angle), 0.0,
                 sin(angle), cos(angle), 0.0,
                 0.0, 0.0, 1.0)
+
+        fun skew(x: Double, y: Double) = Mat33(
+                1.0, tan(x), 0.0,
+                tan(y), 1.0, 0.0,
+                0.0, 0.0, 1.0)
+
+        val IDENTITY = Mat33(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
     }
 
 }

@@ -250,4 +250,10 @@ internal class PathTokenizerTest {
         assertEquals(listOf(-0.1, 0.0), tokens.values)
     }
 
+    @Test
+    fun `parse list of values`() {
+        val values = tokenizer.parseValues("10.0 -20 +30-40.")
+        assertEquals(listOf(10.0, -20.0, 30.0, -40.0), values)
+    }
+
 }

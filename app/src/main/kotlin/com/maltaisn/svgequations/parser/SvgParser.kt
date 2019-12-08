@@ -36,7 +36,7 @@ class SvgParser(val lenient: Boolean) {
      * Can return an empty list if file contains no path data.
      * @throws SvgParseException Thrown on parse errors.
      */
-    fun parse(inputStream: InputStream): List<String> {
+    fun parse(inputStream: InputStream): List<PathElement> {
         // Parse SVG file (a XML file)
         val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val root = try {
@@ -49,20 +49,20 @@ class SvgParser(val lenient: Boolean) {
         val pathElements = root.getElementsByTagName("path")
 
         // Collect path elements data
-        val paths = mutableListOf<String>()
+        val paths = mutableListOf<PathElement>()
         for (i in 0 until pathElements.length) {
             val pathElement = pathElements.item(i)
-            val pathAttr = pathElement.attributes.getNamedItem("d")
-            val pathStr = pathAttr?.nodeValue
+            val pathStr = pathElement.attributes.getNamedItem("d")?.nodeValue
+            val transformStr = pathElement.attributes.getNamedItem("transform")?.nodeValue
             if (pathStr != null && pathStr.isNotBlank() && pathStr != "none") {
-                paths += pathStr
+                paths += PathElement(pathStr, transformStr)
             }
         }
 
         return paths
     }
 
-    fun parse(file: File): List<String> {
+    fun parse(file: File): List<PathElement> {
         if (!file.exists()) {
             if (lenient) {
                 return emptyList()
@@ -74,5 +74,7 @@ class SvgParser(val lenient: Boolean) {
         }
         return parse(file.inputStream())
     }
+
+    data class PathElement(val path: String, val transform: String?)
 
 }

@@ -36,4 +36,19 @@ internal class Mat33Test {
         assertEquals(Mat33(114.0, 255.0, 169.0, -35.0, 49.0, 23.0, 47.0, 155.0, 104.0), mat1 * mat2)
     }
 
+
+    @Test
+    fun `matrix multiplication with identity`() {
+        val mat1 = Mat33(0.0, 12.0, 11.0, 7.0, 5.0, -1.0, 3.0, 8.0, 6.0)
+        val mat2 = Mat33.IDENTITY
+        assertEquals(mat1, mat1 * mat2)
+    }
+
+    @Test
+    fun `matrix multiplication with identity 2`() {
+        val mat1 = Mat33.IDENTITY
+        val mat2 = Mat33(0.0, 12.0, 11.0, 7.0, 5.0, -1.0, 3.0, 8.0, 6.0)
+        assertEquals(mat2, mat1 * mat2)
+    }
+
 }

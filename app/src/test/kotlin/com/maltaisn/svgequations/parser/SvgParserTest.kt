@@ -16,6 +16,7 @@
 
 package com.maltaisn.svgequations.parser
 
+import com.maltaisn.svgequations.parser.SvgParser.PathElement
 import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
@@ -28,16 +29,22 @@ internal class SvgParserTest {
     @Test
     fun `parse input stream single path`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-1.svg")!!)
-        assertEquals(listOf("M0,0 v20 h20 v-20 Z"), paths)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", null)), paths)
+    }
+
+    @Test
+    fun `parse input stream single path transform`() {
+        val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-transform.svg")!!)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", "translate(10,10)")), paths)
     }
 
     @Test
     fun `parse input stream multiple paths`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-3.svg")!!)
         assertEquals(listOf(
-                "M0,0 h5 v5 h-5 Z",
-                "M5,5 h10 v10 h-10 Z",
-                "M15,15 h20 v20 h-20 Z"
+                PathElement("M0,0 h5 v5 h-5 Z", null),
+                PathElement("M5,5 h10 v10 h-10 Z", null),
+                PathElement("M15,15 h20 v20 h-20 Z", null)
         ), paths)
     }
 

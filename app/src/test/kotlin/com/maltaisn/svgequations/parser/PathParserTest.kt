@@ -230,9 +230,4 @@ internal class PathParserTest {
         parser.parse(tokenizer.tokenize("M10,10 a20,10 90 1223,1 20,0"))
     }
 
-    @Test
-    fun `arc bad boolean lenient`() {
-        parserLenient.parse(tokenizer.tokenize("M10,10 a20,10 90 1223,1 20,0"))
-    }
-
 }

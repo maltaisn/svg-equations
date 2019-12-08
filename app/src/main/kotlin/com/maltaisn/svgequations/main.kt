@@ -25,6 +25,7 @@ import com.maltaisn.svgequations.math.Mat33
 import com.maltaisn.svgequations.parser.PathParser
 import com.maltaisn.svgequations.parser.PathTokenizer
 import com.maltaisn.svgequations.parser.SvgParser
+import com.maltaisn.svgequations.parser.TransformParser
 import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -57,6 +58,7 @@ fun main(args: Array<String>) {
         val svgParser = SvgParser(params.lenient)
         val pathTokenizer = PathTokenizer(params.lenient)
         val pathParser = PathParser(params.lenient)
+        val transformParser = TransformParser(params.lenient)
 
         // Create equation generator
         val formatter = EquationFormatter(DecimalFormat().apply {
@@ -72,10 +74,8 @@ fun main(args: Array<String>) {
             else -> error("Unknown type")
         }
 
-        // Create transformation matrix
-        val transform = Mat33.scale(params.scale[0], -params.scale[1]) *
-                Mat33.translate(params.translate[0], params.translate[1]) *
-                Mat33.rotation(Math.toRadians(params.rotation))
+        // Create SVG transformation matrix and invert Y axis.
+        val svgTransform = Mat33.scale(1.0, -1.0) * transformParser.parse(params.transform)
 
         // Generate equations
         for (filename in params.files) {
@@ -83,7 +83,16 @@ fun main(args: Array<String>) {
 
             // Parse SVG paths and transform them
             val pathsData = svgParser.parse(file)
-            val paths = pathsData.map { pathParser.parse(pathTokenizer.tokenize(it)).transform(transform) }
+            val paths = pathsData.map {
+                val tokens = pathTokenizer.tokenize(it.path)
+                val path = pathParser.parse(tokens)
+                val transform = if (it.transform != null) {
+                    transformParser.parse(it.transform)
+                } else {
+                    Mat33.IDENTITY
+                }
+                path.transform(svgTransform * transform)
+            }
 
             // Generate and output equations
             val equations = paths.flatMap { generator.generateEquation(it) }

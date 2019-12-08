@@ -29,17 +29,11 @@ class Parameters {
     @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations.", order = 0)
     var precision = 2
 
-    @Parameter(names = ["--scale"], arity = 2, description = "SVG scale factor in each direction (scale X, scale Y).", order = 10)
-    var scale: List<Double> = listOf(1.0, 1.0)
-
-    @Parameter(names = ["--rotate"], description = "SVG rotation in degrees, counter-clockwise.", order = 20)
-    var rotation: Double = 0.0
-
-    @Parameter(names = ["--translate"], arity = 2, description = "SVG translation distance (translate X, translate Y).", order = 30)
-    var translate: List<Double> = listOf(0.0, 0.0)
-
-    @Parameter(names = ["-t", "--type"], description = "Type of equations to generate, either 'parametric' or 'cartesian'.", order = 40)
+    @Parameter(names = ["-e", "--equations"], description = "Type of equations to generate, either 'parametric' or 'cartesian'.", order = 10)
     var type = TYPE_PARAMETRIC
+
+    @Parameter(names = ["-t", "--transform"], description = "Transformations to apply on SVG.", order = 20)
+    var transform = ""
 
     @Parameter(names = ["-x", "--latex"], description = "Whether to format output as latex equations.", order = 50)
     var convertToLatex = false
