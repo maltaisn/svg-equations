@@ -1,3 +1,8 @@
+# Java runtime library
+-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)
+# JDK XML classes
+-libraryjars <java.home>/jmods/java.xml.jmod(!**.jar;!module-info.class)
+
 -dontobfuscate
 
 # JCommander

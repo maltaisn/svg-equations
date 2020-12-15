@@ -1,13 +1,12 @@
 buildscript {
     val kotlinVersion: String by project
-    val proguardLocation: String by project
     repositories {
+        google()
         jcenter()
-        flatDir("dirs" to proguardLocation)
     }
     dependencies {
         classpath(kotlin("gradle-plugin", kotlinVersion))
-        classpath(":proguard:")
+        classpath("com.guardsquare:proguard-gradle:7.0.1")
     }
 }
 

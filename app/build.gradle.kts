@@ -43,6 +43,5 @@ tasks.register<proguard.gradle.ProGuardTask>("shrinkJar") {
     configuration("proguard-rules.pro")
     injars(distFile)
     outjars(distFile.resolveSibling("svgeq-release.jar"))
-    libraryjars("${System.getProperty("java.home")}/lib/rt.jar")
     libraryjars(configurations.runtimeClasspath.get().files)
 }
