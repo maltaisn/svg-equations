@@ -33,19 +33,16 @@ class StyleGenerator {
     @Language("JavaScript")
     fun generateStyleScript(paths: List<Path>) =
         """
-            n = ${paths.sumBy { it.curves.size }};
-            data = atob("${createStyleDataString(paths)}");
-            
-            state = Calc.getState();
-            j = 0;
-            for (i = 0; i < n; i++) {
-                eq = state.expressions.list[i];
-                eq.lineOpacity = (data.charCodeAt(j++) / 255).toFixed(2);
-                eq.color = "#" + (data.charCodeAt(j++) << 16 | data.charCodeAt(j++) << 8 | 
-                                   data.charCodeAt(j++)).toString(16).padStart(6, "0");
-                eq.lineWidth = (data.charCodeAt(j++) / 10).toFixed(1);
+            var d = atob("${createStyleDataString(paths)}");
+            var dc = d.charCodeAt.bind(d);
+            var s = Calc.getState();
+            for (i = 0, j = 0; i < ${paths.sumBy { it.curves.size }}; i++) {
+                var e = s.expressions.list[i];
+                e.lineOpacity = (dc(j++) / 255).toFixed(2);
+                e.color = "#" + (dc(j++) << 16 | dc(j++) << 8 | dc(j++)).toString(16).padStart(6, "0");
+                e.lineWidth = (dc(j++) / 10).toFixed(1);
             }
-            Calc.setState(state);
+            Calc.setState(s);
         """.trimIndent()
 
     private fun createStyleDataString(paths: List<Path>): String {
