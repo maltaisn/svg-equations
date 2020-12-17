@@ -6,7 +6,8 @@ For this reason, every unsupported element must be converted to a path using a
 vector editor like Inkscape, or an optimizer like SVGO.
 
 This was primarily aimed to be used with [Desmos](https://www.desmos.com/calculator).
-Equations with latex formatting can be copy-pasted directly in the calculator.
+Equations with latex formatting can be copy-pasted directly in the calculator, and it
+is possible to generate a script used to set some basic styling on equations.
 
 ![Desmos preview](example/image.png)
 
@@ -22,11 +23,14 @@ java -jar svgeq.jar <svg-file> [options]
 The CLI expects at least one parameter specifying the `.svg` file, but there can be more than one.
 
 #### Options
+- **-s**, **--style**: Whether to output a script that can used to set the style for Desmos.
+The supported styles are stroke color, opacity and width. Default: false.
 - **-p**, **--precision**: Number of decimals in the generated equations. Default: 2.
 - **-e**, **--equations**: Equations type, one of: parametric, cartesian.
 - **-t**, **--transform**: Transformations applied on the whole SVG.
 - **-x**, **--latex**: Whether to format output as latex equations or not. Default: false.
 - **-l**, **--lenient**: Set this option to enable lenient mode and ignore non-fatal parsing errors.
+- **--width-mult**: If generating the style script, the multiplier used on line width, for adjustment. Default: 1.
 - **-h**, **--help**: Show the help message.
 
 Transformations use [SVG grammar](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform) for 
@@ -38,10 +42,12 @@ Here's an example usage of options:
 ```
 
 #### Current limitations
-- Only supports `path` element and its `d` and `transform` attributes.
+- The only supported tag is `path`, and the only supported attributes are `d`, `transform`, `opacity`,
+`stroke-opacity`, `stroke` and `stroke-width`. Make sure to manually check your SVG file content before
+generating the equations. Notably, there shouldn't be any groups in the SVG structure.
 - Cartesian equation type only supports straight lines. Cartesian equations
 for bezier curves are [theoretically possible](https://math.stackexchange.com/a/438759/515717) but not simple,
-and performance when plotted would be bad.
+and performance when plotted would be bad. Also see #1.
 
 ## Changelog
 See [changelog](CHANGELOG.md).

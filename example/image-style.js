@@ -1,0 +1,13 @@
+n = 337;
+data = atob("//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb/8IBGNv/wgEY2//CARjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjb//zIyNv//MjI2//8yMjY=");
+
+state = Calc.getState();
+j = 0;
+for (i = 0; i < n; i++) {
+    eq = state.expressions.list[i];
+    eq.lineOpacity = (data.charCodeAt(j++) / 255).toFixed(2);
+    eq.color = "#" + (data.charCodeAt(j++) << 16 | data.charCodeAt(j++) << 8 |
+        data.charCodeAt(j++)).toString(16).padStart(6, "0");
+    eq.lineWidth = (data.charCodeAt(j++) / 10).toFixed(1);
+}
+Calc.setState(state);
