@@ -53,6 +53,14 @@ fun main(args: Array<String>) {
             exitProcess(1)
         }
 
+        if (params.version) {
+            // Get version from resources and print it.
+            val versionRes = Parameters::class.java.classLoader.getResourceAsStream("version.txt")!!
+            val version = String(versionRes.readBytes())
+            println("svgeq v$version")
+            exitProcess(0)
+        }
+
         // Validate arguments
         params.validate()
 

@@ -19,7 +19,6 @@ package com.maltaisn.svgequations
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.Parameters
 
-
 @Parameters(separators = " =")
 class Parameters {
 
@@ -36,7 +35,7 @@ class Parameters {
 
     @Parameter(names = ["--width-mult"],
         description = "Multiplier to apply on line widths when generating style script.",
-        order = 5)
+        order = 8)
     var lineWidthMult = 1.0
 
     @Parameter(names = ["-e", "--equations"],
@@ -53,9 +52,11 @@ class Parameters {
     @Parameter(names = ["-l", "--lenient"], description = "Enable lenient mode to ignore non-fatal errors.", order = 60)
     var lenient = false
 
+    @Parameter(names = ["-v", "--version"], description = "Show the version", order = 65)
+    var version = false
+
     @Parameter(names = ["-h", "--help"], description = "Show help message.", help = true, order = 70)
     var help = false
-
 
     fun validate() {
         if (precision !in 0..8) {
