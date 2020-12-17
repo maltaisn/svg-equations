@@ -17,7 +17,9 @@
 package com.maltaisn.svgequations.generator
 
 import com.maltaisn.svgequations.Path
+import org.intellij.lang.annotations.Language
 import java.util.Base64
+import kotlin.math.roundToInt
 
 /**
  * Class used to generate a Desmos-specific script to set stroke styles for each
@@ -28,23 +30,26 @@ class StyleGenerator {
     /**
      * Returns a string containing the styling script for [paths].
      */
-    fun generateStyleScript(paths: List<Path>) = """
-            n = ${paths.sumBy { it.curves.size }}
+    @Language("JavaScript")
+    fun generateStyleScript(paths: List<Path>) =
+        """
+            n = ${paths.sumBy { it.curves.size }};
             data = atob("${createStyleDataString(paths)}");
             
             state = Calc.getState();
             j = 0;
             for (i = 0; i < n; i++) {
-                eq = state.expressions.list[i]
-                eq.lineOpacity = (data.charCodeAt(j++) / 255).toFixed(2)
-                eq.color = "#" + (data.charCodeAt(j++) | data.charCodeAt(j++) << 8 | 
-                                   data.charCodeAt(j++) << 16).toString(16).padStart(6, "0");
+                eq = state.expressions.list[i];
+                eq.lineOpacity = (data.charCodeAt(j++) / 255).toFixed(2);
+                eq.color = "#" + (data.charCodeAt(j++) << 16 | data.charCodeAt(j++) << 8 | 
+                                   data.charCodeAt(j++)).toString(16).padStart(6, "0");
+                eq.lineWidth = (data.charCodeAt(j++) / 10).toFixed(1);
             }
-            Calc.setState(state)
+            Calc.setState(state);
         """.trimIndent()
 
     private fun createStyleDataString(paths: List<Path>): String {
-        val colorArray = ByteArray(4 * paths.sumBy { it.curves.size })
+        val colorArray = ByteArray(5 * paths.sumBy { it.curves.size })
         var i = 0
         for (path in paths) {
             repeat(path.curves.size) {
@@ -52,7 +57,8 @@ class StyleGenerator {
                 colorArray[i + 1] = path.color.r.toByte()
                 colorArray[i + 2] = path.color.g.toByte()
                 colorArray[i + 3] = path.color.b.toByte()
-                i += 4
+                colorArray[i + 4] = (path.width * 10).roundToInt().coerceIn(0, 255).toByte()
+                i += 5
             }
         }
         return Base64.getEncoder().encodeToString(colorArray)

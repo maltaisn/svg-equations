@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35">
-    <path d="M0,0 h5 v5 h-5 Z" stroke="red" stroke-opacity="0.12"/>
-    <path d="M5,5 h10 v10 h-10 Z" stroke="rgba(0 0 0 / 50%)"/>
+    <path d="M0,0 h5 v5 h-5 Z" stroke="red" stroke-opacity="0.12" stroke-width="4"/>
+    <path d="M5,5 h10 v10 h-10 Z" stroke="rgba(0 0 0 / 50%)" stroke-width="4.5"/>
     <path d="M15,15 h20 v20 h-20 Z" stroke="#fff" opacity="50%"/>
 </svg>

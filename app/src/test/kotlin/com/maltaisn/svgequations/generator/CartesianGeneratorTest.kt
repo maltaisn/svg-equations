@@ -30,14 +30,14 @@ internal class CartesianGeneratorTest {
 
     @Test
     fun `generate line path equation`() {
-        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(11.0, 6.0))), Color.BLACK)
+        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(11.0, 6.0))), Color.BLACK, 1.0)
         val equation = generator.generateEquation(path)
         assertEquals(listOf("-5x + 10y = 5 {1 <= x <= 11}"), equation)
     }
 
     @Test(expected = ParameterException::class)
     fun `fail for curve`() {
-        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(2.0, 2.0), Vec2(3.0, 1.0))), Color.BLACK)
+        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(2.0, 2.0), Vec2(3.0, 1.0))), Color.BLACK, 1.0)
         generator.generateEquation(path)
     }
 

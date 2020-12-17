@@ -58,8 +58,9 @@ class SvgParser(val lenient: Boolean) {
             val colorStr = pathElement.attributes.getNamedItem("stroke")?.nodeValue
             val opacityStr = pathElement.attributes.getNamedItem("stroke-opacity")?.nodeValue
                 ?: pathElement.attributes.getNamedItem("opacity")?.nodeValue
+            val widthStr = pathElement.attributes.getNamedItem("stroke-width")?.nodeValue
             if (pathStr != null && pathStr.isNotBlank() && pathStr != "none") {
-                paths += PathElement(pathStr, transformStr, colorStr, opacityStr)
+                paths += PathElement(pathStr, transformStr, colorStr, opacityStr, widthStr)
             }
         }
 
@@ -81,9 +82,10 @@ class SvgParser(val lenient: Boolean) {
 
     data class PathElement(
         val path: String,
-        val transform: String?,
-        val color: String?,
-        val opacity: String?,
+        val transform: String? = null,
+        val color: String? = null,
+        val opacity: String? = null,
+        val width: String? = null,
     )
 
 }

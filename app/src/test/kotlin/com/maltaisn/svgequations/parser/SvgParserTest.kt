@@ -21,7 +21,6 @@ import org.junit.Test
 import java.io.File
 import kotlin.test.assertEquals
 
-
 internal class SvgParserTest {
 
     private val parser = SvgParser(false)
@@ -29,22 +28,22 @@ internal class SvgParserTest {
     @Test
     fun `parse input stream single path`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-1.svg")!!)
-        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", null, null, null)), paths)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z")), paths)
     }
 
     @Test
     fun `parse input stream single path transform`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-transform.svg")!!)
-        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", "translate(10,10)", null, null)), paths)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", "translate(10,10)")), paths)
     }
 
     @Test
     fun `parse input stream multiple paths`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-3.svg")!!)
         assertEquals(listOf(
-            PathElement("M0,0 h5 v5 h-5 Z", null, null, null),
-            PathElement("M5,5 h10 v10 h-10 Z", null, null, null),
-            PathElement("M15,15 h20 v20 h-20 Z", null, null, null)
+            PathElement("M0,0 h5 v5 h-5 Z"),
+            PathElement("M5,5 h10 v10 h-10 Z"),
+            PathElement("M15,15 h20 v20 h-20 Z")
         ), paths)
     }
 
@@ -52,9 +51,9 @@ internal class SvgParserTest {
     fun `parse input stream style attributes`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-style.svg")!!)
         assertEquals(listOf(
-            PathElement("M0,0 h5 v5 h-5 Z", null, "red", "0.12"),
-            PathElement("M5,5 h10 v10 h-10 Z", null, "rgba(0 0 0 / 50%)", null),
-            PathElement("M15,15 h20 v20 h-20 Z", null, "#fff", "50%")
+            PathElement("M0,0 h5 v5 h-5 Z", color = "red", opacity = "0.12", width = "4"),
+            PathElement("M5,5 h10 v10 h-10 Z", color = "rgba(0 0 0 / 50%)", width = "4.5"),
+            PathElement("M15,15 h20 v20 h-20 Z", color = "#fff", opacity = "50%")
         ), paths)
     }
 

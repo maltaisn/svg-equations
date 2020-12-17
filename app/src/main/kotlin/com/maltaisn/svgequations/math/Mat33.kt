@@ -16,6 +16,7 @@
 
 package com.maltaisn.svgequations.math
 
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.tan
@@ -33,15 +34,19 @@ data class Mat33(val m00: Double, val m01: Double, val m02: Double,
                  val m10: Double, val m11: Double, val m12: Double,
                  val m20: Double, val m21: Double, val m22: Double) {
 
+    /** Average scale component of matrix. */
+    val scale: Double
+        get() = (abs(m00) + abs(m11)) / 2
+
     /** Matrix addition */
     operator fun plus(mat: Mat33) = Mat33(
-            m00 + mat.m00, m01 + mat.m01, m02 + mat.m02,
-            m10 + mat.m10, m11 + mat.m11, m12 + mat.m12,
-            m20 + mat.m20, m21 + mat.m21, m22 + mat.m22)
+        m00 + mat.m00, m01 + mat.m01, m02 + mat.m02,
+        m10 + mat.m10, m11 + mat.m11, m12 + mat.m12,
+        m20 + mat.m20, m21 + mat.m21, m22 + mat.m22)
 
     /** Matrix subtraction */
     operator fun minus(mat: Mat33) = Mat33(
-            m00 - mat.m00, m01 - mat.m01, m02 - mat.m02,
+        m00 - mat.m00, m01 - mat.m01, m02 - mat.m02,
             m10 - mat.m10, m11 - mat.m11, m12 - mat.m12,
             m20 - mat.m20, m21 - mat.m21, m22 - mat.m22)
 

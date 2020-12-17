@@ -28,6 +28,7 @@ import com.maltaisn.svgequations.parser.PathParser
 import com.maltaisn.svgequations.parser.PathTokenizer
 import com.maltaisn.svgequations.parser.SvgParser
 import com.maltaisn.svgequations.parser.TransformParser
+import com.maltaisn.svgequations.parser.parseError
 import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -90,12 +91,17 @@ fun main(args: Array<String>) {
                 val tokens = pathTokenizer.tokenize(it.path)
                 val curves = pathParser.parse(tokens)
                 val color = colorParser.parse(it.color, it.opacity)
+                val width = if (it.width != null) {
+                    (it.width.toDoubleOrNull() ?: parseError("Invalid stroke width")) * params.lineWidthMult
+                } else {
+                    2.5  // default width
+                }
                 val transform = if (it.transform != null) {
                     transformParser.parse(it.transform)
                 } else {
                     Mat33.IDENTITY
                 }
-                val path = Path(curves, color)
+                val path = Path(curves, color, width)
                 path.transform(svgTransform * transform)
             }
 

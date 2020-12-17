@@ -34,6 +34,11 @@ class Parameters {
         order = 5)
     var style = false
 
+    @Parameter(names = ["--width-mult"],
+        description = "Multiplier to apply on line widths when generating style script.",
+        order = 5)
+    var lineWidthMult = 1.0
+
     @Parameter(names = ["-e", "--equations"],
         description = "Type of equations to generate, either 'parametric' or 'cartesian'.",
         order = 10)
@@ -55,6 +60,9 @@ class Parameters {
     fun validate() {
         if (precision !in 0..8) {
             paramError("Precision must be between 0 and 8.")
+        }
+        if (lineWidthMult <= 0.0) {
+            paramError("Line width multiplier must be positive.")
         }
     }
 
