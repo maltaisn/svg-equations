@@ -31,7 +31,6 @@ class ParametricGenerator(override var formatter: EquationFormatter,
 
     override fun generateEquation(path: Path): List<String> {
         val equations = mutableListOf<String>()
-        val t = parameter
         for (curve in path.curves) {
             // Get curve terms and coefficients from bezier definition
             val terms = mutableListOf<Pair<Vec2, String>>()

@@ -23,7 +23,6 @@ import java.io.IOException
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-
 /**
  * Used to parse the `path` elements of a SVG file into [Path] classes.
  *
@@ -46,6 +45,8 @@ class SvgParser(val lenient: Boolean) {
         } catch (e: IOException) {
             parseError("Could not read input file.")
         }
+        // Find all <path> elements, regardless of how nested they are. This will almost always lead to misrendering
+        // if path is not directly nested under the root <svg>, but still better than not showing them I guess.
         val pathElements = root.getElementsByTagName("path")
 
         // Collect path elements data
@@ -54,8 +55,11 @@ class SvgParser(val lenient: Boolean) {
             val pathElement = pathElements.item(i)
             val pathStr = pathElement.attributes.getNamedItem("d")?.nodeValue
             val transformStr = pathElement.attributes.getNamedItem("transform")?.nodeValue
+            val colorStr = pathElement.attributes.getNamedItem("stroke")?.nodeValue
+            val opacityStr = pathElement.attributes.getNamedItem("stroke-opacity")?.nodeValue
+                ?: pathElement.attributes.getNamedItem("opacity")?.nodeValue
             if (pathStr != null && pathStr.isNotBlank() && pathStr != "none") {
-                paths += PathElement(pathStr, transformStr)
+                paths += PathElement(pathStr, transformStr, colorStr, opacityStr)
             }
         }
 
@@ -75,6 +79,11 @@ class SvgParser(val lenient: Boolean) {
         return parse(file.inputStream())
     }
 
-    data class PathElement(val path: String, val transform: String?)
+    data class PathElement(
+        val path: String,
+        val transform: String?,
+        val color: String?,
+        val opacity: String?,
+    )
 
 }

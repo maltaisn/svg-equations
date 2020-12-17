@@ -23,13 +23,13 @@ import com.maltaisn.svgequations.math.Vec2
 /**
  * A SVG path made of many [curves].
  */
-class Path(val curves: List<Curve>) {
+class Path(val curves: List<Curve>, val color: Color) {
 
     fun transform(transform: Mat33) = Path(curves.map { curve ->
         curve.map { p -> transform * p }
-    })
+    }, color)
 
-    override fun toString() = "Path($curves curves)"
+    override fun toString() = "Path(#$color, $curves curves)"
 
 }
 

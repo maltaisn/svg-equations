@@ -21,7 +21,9 @@ import com.maltaisn.svgequations.generator.CartesianGenerator
 import com.maltaisn.svgequations.generator.EquationFormatter
 import com.maltaisn.svgequations.generator.EquationGenerator
 import com.maltaisn.svgequations.generator.ParametricGenerator
+import com.maltaisn.svgequations.generator.StyleGenerator
 import com.maltaisn.svgequations.math.Mat33
+import com.maltaisn.svgequations.parser.ColorParser
 import com.maltaisn.svgequations.parser.PathParser
 import com.maltaisn.svgequations.parser.PathTokenizer
 import com.maltaisn.svgequations.parser.SvgParser
@@ -30,7 +32,6 @@ import java.io.File
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import kotlin.system.exitProcess
-
 
 fun main(args: Array<String>) {
     val params = Parameters()
@@ -58,6 +59,7 @@ fun main(args: Array<String>) {
         val svgParser = SvgParser(params.lenient)
         val pathTokenizer = PathTokenizer(params.lenient)
         val pathParser = PathParser(params.lenient)
+        val colorParser = ColorParser(params.lenient)
         val transformParser = TransformParser(params.lenient)
 
         // Create equation generator
@@ -73,6 +75,7 @@ fun main(args: Array<String>) {
             Parameters.TYPE_CARTESIAN -> CartesianGenerator(formatter, params.convertToLatex)
             else -> error("Unknown type")
         }
+        val styleGenerator = StyleGenerator()
 
         // Create SVG transformation matrix and invert Y axis.
         val svgTransform = Mat33.scale(1.0, -1.0) * transformParser.parse(params.transform)
@@ -85,12 +88,14 @@ fun main(args: Array<String>) {
             val pathsData = svgParser.parse(file)
             val paths = pathsData.map {
                 val tokens = pathTokenizer.tokenize(it.path)
-                val path = pathParser.parse(tokens)
+                val curves = pathParser.parse(tokens)
+                val color = colorParser.parse(it.color, it.opacity)
                 val transform = if (it.transform != null) {
                     transformParser.parse(it.transform)
                 } else {
                     Mat33.IDENTITY
                 }
+                val path = Path(curves, color)
                 path.transform(svgTransform * transform)
             }
 
@@ -98,9 +103,14 @@ fun main(args: Array<String>) {
             val equations = paths.flatMap { generator.generateEquation(it) }
             val output = file.resolveSibling("${file.nameWithoutExtension}-output.txt")
             output.writeText(equations.joinToString("\n"))
-        }
 
-        exitProcess(0)
+            // Generate style script if needed
+            if (params.style) {
+                val styleScript = styleGenerator.generateStyleScript(paths)
+                val styleOutput = file.resolveSibling("${file.nameWithoutExtension}-style.js")
+                styleOutput.writeText(styleScript)
+            }
+        }
 
     } catch (e: Exception) {
         println("ERROR: ${e.message}\n")

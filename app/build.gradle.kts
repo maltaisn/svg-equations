@@ -21,6 +21,15 @@ sourceSets {
     }
 }
 
+kotlin {
+    sourceSets.all {
+        languageSettings.apply {
+            enableLanguageFeature("InlineClasses")
+            useExperimentalAnnotation("kotlin.ExperimentalUnsignedTypes")
+        }
+    }
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_6
     targetCompatibility = JavaVersion.VERSION_1_6

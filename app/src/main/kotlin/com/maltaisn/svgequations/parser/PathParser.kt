@@ -17,10 +17,9 @@
 package com.maltaisn.svgequations.parser
 
 import com.maltaisn.svgequations.Curve
-import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
 import java.util.*
-
+import kotlin.collections.ArrayDeque
 
 /**
  * Used to parse SVG tokens into curve objects.
@@ -32,15 +31,13 @@ class PathParser(val lenient: Boolean) {
 
     private lateinit var tokens: PathTokens
 
-    private val curves = LinkedList<Curve>()
-
     /**
-     * Parse SVG path [tokens].
+     * Parse SVG path [tokens] into a list of curves.
      * @throws SvgParseException Thrown on parse errors.
      */
-    fun parse(tokens: PathTokens): Path {
+    fun parse(tokens: PathTokens): List<Curve> {
         this.tokens = tokens
-        curves.clear()
+        val curves = ArrayDeque<Curve>()
 
         var lastPoint = Vec2()
         var startPoint = Vec2()
@@ -58,49 +55,49 @@ class PathParser(val lenient: Boolean) {
                 }
                 'Z' -> {
                     // Close path with straight line
-                    addCurve(lastPoint, startPoint)
+                    addCurve(curves, lastPoint, startPoint)
                     point = startPoint
                 }
                 'L' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Line
                     point = readPoint()
-                    addCurve(lastPoint, point)
+                    addCurve(curves, lastPoint, point)
                 }
                 'H' -> withPathContext(absolute, lastPoint.x) { readValue ->
                     // Horizontal line
                     point = Vec2(readValue(), lastPoint.y)
-                    addCurve(lastPoint, point)
+                    addCurve(curves, lastPoint, point)
                 }
                 'V' -> withPathContext(absolute, lastPoint.y) { readValue ->
                     // Vertical line
                     point = Vec2(lastPoint.x, readValue())
-                    addCurve(lastPoint, point)
+                    addCurve(curves, lastPoint, point)
                 }
                 'Q' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Quadratic bezier curve
                     val c1 = readPoint()
                     point = readPoint()
-                    addCurve(lastPoint, c1, point)
+                    addCurve(curves, lastPoint, c1, point)
                 }
                 'T' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Shorthand quadratic bezier curve
-                    val c1 = getShorthandControl(curves.last, 3, lastPoint)
+                    val c1 = getShorthandControl(curves.last(), 3, lastPoint)
                     point = readPoint()
-                    addCurve(lastPoint, c1, point)
+                    addCurve(curves, lastPoint, c1, point)
                 }
                 'C' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Cubic bezier curve
                     val c1 = readPoint()
                     val c2 = readPoint()
                     point = readPoint()
-                    addCurve(lastPoint, c1, c2, point)
+                    addCurve(curves, lastPoint, c1, c2, point)
                 }
                 'S' -> withPathContext(absolute, lastPoint) { readPoint ->
                     // Shorthand cubic bezier curve
-                    val c1 = getShorthandControl(curves.last, 4, lastPoint)
+                    val c1 = getShorthandControl(curves.last(), 4, lastPoint)
                     val c2 = readPoint()
                     point = readPoint()
-                    addCurve(lastPoint, c1, c2, point)
+                    addCurve(curves, lastPoint, c1, c2, point)
                 }
                 'A' -> withPathContext(absolute, lastPoint) { readPoint ->
                     val radius = this@PathParser.readPoint()
@@ -116,31 +113,35 @@ class PathParser(val lenient: Boolean) {
             lastPoint = point
         }
 
-        return Path(LinkedList(curves))
+        return curves
     }
 
-    private fun addCurve(vararg points: Vec2) {
+    private fun addCurve(curves: MutableList<Curve>, vararg points: Vec2) {
         if (points.first() != points.last()) {
             // Don't add element if start point matches end point which means element is invisible.
             curves += points.toList()
         }
     }
 
-    private inline fun withPathContext(absolute: Boolean, lastPoint: Vec2,
-                                       block: (readPoint: () -> Vec2) -> Unit) =
-            if (absolute) {
-                block { readPoint() }
-            } else {
-                block { readRelativePoint(lastPoint) }
-            }
+    private inline fun withPathContext(
+        absolute: Boolean, lastPoint: Vec2,
+        block: (readPoint: () -> Vec2) -> Unit
+    ) =
+        if (absolute) {
+            block { readPoint() }
+        } else {
+            block { readRelativePoint(lastPoint) }
+        }
 
-    private inline fun withPathContext(absolute: Boolean, lastValue: Double,
-                                       block: (readValue: () -> Double) -> Unit) =
-            if (absolute) {
-                block { readValue() }
-            } else {
-                block { readValue() + lastValue }
-            }
+    private inline fun withPathContext(
+        absolute: Boolean, lastValue: Double,
+        block: (readValue: () -> Double) -> Unit
+    ) =
+        if (absolute) {
+            block { readValue() }
+        } else {
+            block { readValue() + lastValue }
+        }
 
     private fun readValue() = tokens.values.pop()
 
@@ -158,17 +159,17 @@ class PathParser(val lenient: Boolean) {
     private fun readPoint() = Vec2(readValue(), readValue())
 
     private fun readRelativePoint(lastPoint: Vec2) =
-            Vec2(lastPoint.x + readValue(), lastPoint.y + readValue())
+        Vec2(lastPoint.x + readValue(), lastPoint.y + readValue())
 
     private fun getShorthandControl(last: Curve, size: Int, currentPoint: Vec2) =
-            if (last.size == size) {
-                // The control point is the reflection of the second control point on
-                // the previous cubic command relative to the current point.
-                currentPoint + (currentPoint - last[last.size - 2])
-            } else {
-                // Assume control point is coincident with the current point.
-                currentPoint
-            }
+        if (last.size == size) {
+            // The control point is the reflection of the second control point on
+            // the previous cubic command relative to the current point.
+            currentPoint + (currentPoint - last[last.size - 2])
+        } else {
+            // Assume control point is coincident with the current point.
+            currentPoint
+        }
 
 }
 

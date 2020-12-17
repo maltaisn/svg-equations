@@ -29,7 +29,14 @@ class Parameters {
     @Parameter(names = ["-p", "--precision"], description = "Precision of the generated equations.", order = 0)
     var precision = 2
 
-    @Parameter(names = ["-e", "--equations"], description = "Type of equations to generate, either 'parametric' or 'cartesian'.", order = 10)
+    @Parameter(names = ["-s", "--style"],
+        description = "Whether to generate a Desmos-specific script for setting stroke style.",
+        order = 5)
+    var style = false
+
+    @Parameter(names = ["-e", "--equations"],
+        description = "Type of equations to generate, either 'parametric' or 'cartesian'.",
+        order = 10)
     var type = TYPE_PARAMETRIC
 
     @Parameter(names = ["-t", "--transform"], description = "Transformations to apply on SVG.", order = 20)
@@ -52,8 +59,7 @@ class Parameters {
     }
 
     companion object {
-        val TYPE_PARAMETRIC = "parametric"
-        val TYPE_CARTESIAN = "cartesian"
+        const val TYPE_PARAMETRIC = "parametric"
+        const val TYPE_CARTESIAN = "cartesian"
     }
-
 }
