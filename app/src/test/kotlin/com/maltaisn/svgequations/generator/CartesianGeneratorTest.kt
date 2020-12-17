@@ -16,6 +16,7 @@
 
 package com.maltaisn.svgequations.generator
 
+import com.maltaisn.svgequations.Color
 import com.maltaisn.svgequations.ParameterException
 import com.maltaisn.svgequations.Path
 import com.maltaisn.svgequations.math.Vec2
@@ -29,14 +30,14 @@ internal class CartesianGeneratorTest {
 
     @Test
     fun `generate line path equation`() {
-        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(11.0, 6.0))))
+        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(11.0, 6.0))), Color.BLACK)
         val equation = generator.generateEquation(path)
         assertEquals(listOf("-5x + 10y = 5 {1 <= x <= 11}"), equation)
     }
 
     @Test(expected = ParameterException::class)
     fun `fail for curve`() {
-        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(2.0, 2.0), Vec2(3.0, 1.0))))
+        val path = Path(listOf(listOf(Vec2(1.0, 1.0), Vec2(2.0, 2.0), Vec2(3.0, 1.0))), Color.BLACK)
         generator.generateEquation(path)
     }
 

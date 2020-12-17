@@ -54,6 +54,9 @@ class ColorParser(val lenient: Boolean) {
         val parts = color.substringAfter('(').substringBefore(')').split(COLOR_PARTS_REGEX)
         val values = mutableListOf<Int>()
         for (part in parts) {
+            if (part.isEmpty()) {
+                continue
+            }
             if (part == "/") {
                 if (values.size != 3) {
                     return invalidColor(color)
@@ -88,7 +91,7 @@ class ColorParser(val lenient: Boolean) {
     }
 
     companion object {
-        private val COLOR_PARTS_REGEX = """\h+""".toRegex()
+        private val COLOR_PARTS_REGEX = """\h+|,""".toRegex()
 
         private val COLOR_NAME_MAP = mapOf(
             "black" to Color.hex("#000000"),

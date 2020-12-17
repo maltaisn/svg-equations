@@ -56,7 +56,7 @@ inline class Color(val value: Int) {
 
         /** Parse color like #rgb, #argb, #rrggbb, #aarrggbb. */
         fun hex(hex: String): Color {
-            val value = hex.substring(1).toIntOrNull(16)
+            val value = hex.substring(1).toUIntOrNull(16)?.toInt()
                 ?: throw IllegalArgumentException("Bad hex color")
             return when (hex.length) {
                 4, 5 -> {

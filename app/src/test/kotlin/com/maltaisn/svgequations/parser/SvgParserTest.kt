@@ -29,22 +29,32 @@ internal class SvgParserTest {
     @Test
     fun `parse input stream single path`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-1.svg")!!)
-        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", null)), paths)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", null, null, null)), paths)
     }
 
     @Test
     fun `parse input stream single path transform`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-transform.svg")!!)
-        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", "translate(10,10)")), paths)
+        assertEquals(listOf(PathElement("M0,0 v20 h20 v-20 Z", "translate(10,10)", null, null)), paths)
     }
 
     @Test
     fun `parse input stream multiple paths`() {
         val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-3.svg")!!)
         assertEquals(listOf(
-                PathElement("M0,0 h5 v5 h-5 Z", null),
-                PathElement("M5,5 h10 v10 h-10 Z", null),
-                PathElement("M15,15 h20 v20 h-20 Z", null)
+            PathElement("M0,0 h5 v5 h-5 Z", null, null, null),
+            PathElement("M5,5 h10 v10 h-10 Z", null, null, null),
+            PathElement("M15,15 h20 v20 h-20 Z", null, null, null)
+        ), paths)
+    }
+
+    @Test
+    fun `parse input stream style attributes`() {
+        val paths = parser.parse(javaClass.classLoader.getResourceAsStream("square-style.svg")!!)
+        assertEquals(listOf(
+            PathElement("M0,0 h5 v5 h-5 Z", null, "red", "0.12"),
+            PathElement("M5,5 h10 v10 h-10 Z", null, "rgba(0 0 0 / 50%)", null),
+            PathElement("M15,15 h20 v20 h-20 Z", null, "#fff", "50%")
         ), paths)
     }
 
