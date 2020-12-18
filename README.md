@@ -41,6 +41,11 @@ Here's an example usage of options:
 -p 3 -e parametric --transform="translate(10 10) rotate(30) skewX(10)" --latex --lenient
 ```
 
+If using the style script, the stroke width will most likely have to be tuned manually.
+This is because Desmos doesn't have an absolute stroke width, but rather the width is kept the same for
+all zoom levels. Therefore, the width must be adjusted for whatever zoom level will be used to view.
+Also note that the script can only set widths ranging from 0.1 to 25.5.
+
 #### Current limitations
 - The only supported tag is `path`, and the only supported attributes are `d`, `transform`, `opacity`,
 `stroke-opacity`, `stroke` and `stroke-width`. Make sure to manually check your SVG file content before

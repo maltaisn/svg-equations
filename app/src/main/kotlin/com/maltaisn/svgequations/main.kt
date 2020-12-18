@@ -99,11 +99,7 @@ fun main(args: Array<String>) {
                 val tokens = pathTokenizer.tokenize(it.path)
                 val curves = pathParser.parse(tokens)
                 val color = colorParser.parse(it.color, it.opacity)
-                val width = if (it.width != null) {
-                    (it.width.toDoubleOrNull() ?: parseError("Invalid stroke width")) * params.lineWidthMult
-                } else {
-                    2.5  // default width
-                }
+                val width = parsePathWidth(it.width, params.lineWidthMult)
                 val transform = if (it.transform != null) {
                     transformParser.parse(it.transform)
                 } else {
@@ -132,3 +128,12 @@ fun main(args: Array<String>) {
     }
 
 }
+
+private fun parsePathWidth(width: String?, mult: Double) =
+    if (width != null) {
+        // Parse line width. Force a minimum of 0.1 to avoid making lines invisible.
+        ((width.toDoubleOrNull() ?: parseError("Invalid stroke width")) * mult)
+            .coerceAtLeast(0.1)
+    } else {
+        2.5  // default width
+    }
